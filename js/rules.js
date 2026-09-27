@@ -13,18 +13,18 @@
   // Statü kodları. Excel'de statü ile ölüm tarihi birlikte anlam taşır;
   // bu yüzden her seçenek "kurum + tarih koşulu" olarak tek kod altında.
   var ES_STATUS = [
-    { code: 'SSK', kurum: 'SSK / 4-a', label: 'SSK (506 sayılı Kanun)', kisa: 'SSK (506)', tarih: 'Ölüm 1.10.2008 öncesi', excel: 'SSK' },
-    { code: 'A', kurum: 'SSK / 4-a', label: '5510 sayılı Kanun 4/I-(a)', kisa: '5510 4/I-(a)', tarih: 'Ölüm 30.9.2008 sonrası', excel: '4/I-(a)' },
-    { code: 'BK', kurum: 'Bağ-Kur / 4-b', label: 'Bağ-Kur (1479 sayılı Kanun)', kisa: 'Bağ-Kur (1479)', tarih: 'Ölüm 1.10.2008 öncesi', excel: 'BağKur' },
-    { code: 'B', kurum: 'Bağ-Kur / 4-b', label: '5510 sayılı Kanun 4/I-(b)', kisa: '5510 4/I-(b)', tarih: 'Ölüm 30.9.2008 sonrası', excel: '4/I-(b)' },
-    { code: 'ES', kurum: 'Emekli Sandığı / 4-c', label: 'Emekli Sandığı (5434 sayılı Kanun)', kisa: 'Emekli Sandığı (5434)', tarih: 'Ölüm tarihinin önemi yok', excel: 'Emekli Sandığı' },
-    { code: 'C', kurum: 'Emekli Sandığı / 4-c', label: '5510 sayılı Kanun 4/I-(c)', kisa: '5510 4/I-(c)', tarih: 'Ölüm 14.10.2008 sonrası', excel: '4/I-(c)' },
-    { code: 'TSSK', kurum: 'Tarım', label: 'Tarım SSK (2925 sayılı Kanun)', kisa: 'Tarım SSK (2925)', tarih: 'Ölüm tarihinin önemi yok', excel: 'Tarım SSK' },
-    { code: 'TBK', kurum: 'Tarım', label: 'Tarım Bağ-Kur (2926 sayılı Kanun)', kisa: 'Tarım Bağ-Kur (2926)', tarih: 'Ölüm 1.10.2008 öncesi', excel: 'Tarım Bağkur' },
-    { code: 'BT', kurum: 'Tarım', label: '5510 sayılı Kanun 4/I-(b) Tarım', kisa: '5510 4/I-(b) Tarım', tarih: 'Ölüm 30.9.2008 sonrası', excel: '4/I-(b) Tarım' },
-    { code: 'BSA', kurum: 'Banka Sandığı', label: 'Banka Sandığı (Aktif)', kisa: 'Banka Sandığı (Aktif)', tarih: 'Ölüm tarihinin önemi yok', excel: 'B. Sandığı (Aktif)' },
-    { code: 'BSD', kurum: 'Banka Sandığı', label: 'Banka Sandığı (Devir)', kisa: 'Banka Sandığı (Devir)', tarih: 'Ölüm 1.10.2008 öncesi', excel: 'B. Sandığı (Devir)' },
-    { code: 'BSD2', kurum: 'Banka Sandığı', label: 'Banka Sandığı (Devir)', kisa: 'Banka Sandığı (Devir)', tarih: 'Ölüm 30.9.2008 sonrası', excel: 'B. Sandığı (Devir)' }
+    { code: 'SSK', kurum: 'SSK / 4-a', label: 'SSK (506)', tarih: 'ölüm 1.10.2008 öncesi', excel: 'SSK' },
+    { code: 'A', kurum: 'SSK / 4-a', label: '5510 4/I-(a)', tarih: 'ölüm 30.9.2008 sonrası', excel: '4/I-(a)' },
+    { code: 'BK', kurum: 'Bağ-Kur / 4-b', label: 'Bağ-Kur (1479)', tarih: 'ölüm 1.10.2008 öncesi', excel: 'BağKur' },
+    { code: 'B', kurum: 'Bağ-Kur / 4-b', label: '5510 4/I-(b)', tarih: 'ölüm 30.9.2008 sonrası', excel: '4/I-(b)' },
+    { code: 'ES', kurum: 'Emekli Sandığı / 4-c', label: 'Emekli Sandığı (5434)', tarih: 'ölüm tarihi fark etmez', excel: 'Emekli Sandığı' },
+    { code: 'C', kurum: 'Emekli Sandığı / 4-c', label: '5510 4/I-(c)', tarih: 'ölüm 14.10.2008 sonrası', excel: '4/I-(c)' },
+    { code: 'TSSK', kurum: 'Tarım', label: 'Tarım SSK (2925)', tarih: 'ölüm tarihi fark etmez', excel: 'Tarım SSK' },
+    { code: 'TBK', kurum: 'Tarım', label: 'Tarım Bağ-Kur (2926)', tarih: 'ölüm 1.10.2008 öncesi', excel: 'Tarım Bağkur' },
+    { code: 'BT', kurum: 'Tarım', label: '5510 4/I-(b) Tarım', tarih: 'ölüm 30.9.2008 sonrası', excel: '4/I-(b) Tarım' },
+    { code: 'BSA', kurum: 'Banka Sandığı', label: 'Banka Sandığı (Aktif)', tarih: 'ölüm tarihi fark etmez', excel: 'B. Sandığı (Aktif)' },
+    { code: 'BSD', kurum: 'Banka Sandığı', label: 'Banka Sandığı (Devir)', tarih: 'ölüm 1.10.2008 öncesi', excel: 'B. Sandığı (Devir)' },
+    { code: 'BSD2', kurum: 'Banka Sandığı', label: 'Banka Sandığı (Devir)', tarih: 'ölüm 30.9.2008 sonrası', excel: 'B. Sandığı (Devir)' }
   ];
 
   // Sık kullanılan kod grupları
@@ -106,18 +106,8 @@
   ];
 
   var ES_SONUC = {
-    iki: {
-      key: 'iki',
-      title: 'İki Aylık',
-      tone: 'good',
-      text: 'Hak sahibi kadına hem ölen eşinden hem de ölen anne/babasından aylık bağlanır.'
-    },
-    tek: {
-      key: 'tek',
-      title: 'Tek Aylık',
-      tone: 'warn',
-      text: 'Eşten ve anne/babadan aylıklar birlikte bağlanmaz; yalnızca tek aylık bağlanır.'
-    }
+    iki: { key: 'iki', title: 'İki aylık bağlanır.', tone: 'good' },
+    tek: { key: 'tek', title: 'Tek aylık bağlanır.', tone: 'warn' }
   };
 
   /* ------------------------------------------------------------------ */
@@ -125,23 +115,23 @@
   /* ------------------------------------------------------------------ */
 
   var AB_STATUS = [
-    { code: 'A', label: 'SSK / 5510 sayılı Kanun 4/I-(a)', excel: '5510, 4/I-(a) veya SSK' },
-    { code: 'B', label: 'Bağ-Kur / 5510 sayılı Kanun 4/I-(b)', excel: '5510, 4/I-(b) veya Bağ-Kur' },
-    { code: 'BT', label: 'Tarım Bağ-Kur / 5510 sayılı Kanun 4/I-(b.4)', excel: '5510, 4/I-(b.4) veya Tarım Bağ-Kur' },
-    { code: 'C', label: '5510 sayılı Kanun 4/I-(c)', kisa: '5510 4/I-(c)', excel: '5510, 4/I-(c)' },
-    { code: 'ES', label: 'Emekli Sandığı (5434 sayılı Kanun)', kisa: 'Emekli Sandığı (5434)', excel: 'Emekli Sandığı (5434)' },
-    { code: 'TSSK', label: 'Tarım SSK (2925 sayılı Kanun)', kisa: 'Tarım SSK (2925)', excel: '2925 Tarım SSK' }
+    { code: 'A', label: 'SSK / 5510 4/I-(a)', excel: '5510, 4/I-(a) veya SSK' },
+    { code: 'B', label: 'Bağ-Kur / 5510 4/I-(b)', excel: '5510, 4/I-(b) veya Bağ-Kur' },
+    { code: 'BT', label: 'Tarım Bağ-Kur / 5510 4/I-(b.4)', excel: '5510, 4/I-(b.4) veya Tarım Bağ-Kur' },
+    { code: 'C', label: '5510 4/I-(c)', excel: '5510, 4/I-(c)' },
+    { code: 'ES', label: 'Emekli Sandığı (5434)', excel: 'Emekli Sandığı (5434)' },
+    { code: 'TSSK', label: 'Tarım SSK (2925)', excel: '2925 Tarım SSK' }
   ];
 
   var AB_TARIH = [
-    { code: 'sonra', label: 'Her iki ölüm de 30.9.2008 sonrası', excel: 'Ölüm 30.9.2008 Sonrası' },
-    { code: 'biri', label: 'Ölümlerden biri 1.10.2008 öncesi, diğeri sonrası', excel: 'Ölümlerden biri 1 Ekim 2008 öncesi' },
-    { code: 'ikisi', label: 'Ölümlerden ikisi de 1.10.2008 öncesi', excel: 'Ölümlerden ikisi de 1 Ekim 2008 öncesi' }
+    { code: 'sonra', label: 'Her ikisi de 30.9.2008 sonrası', excel: 'Ölüm 30.9.2008 Sonrası' },
+    { code: 'biri', label: 'Biri 1.10.2008 öncesi, diğeri sonrası', excel: 'Ölümlerden biri 1 Ekim 2008 öncesi' },
+    { code: 'ikisi', label: 'Her ikisi de 1.10.2008 öncesi', excel: 'Ölümlerden ikisi de 1 Ekim 2008 öncesi' }
   ];
 
   var AB_DONEM = [
-    { code: 'once2017', label: '5.12.2017 tarihi öncesi' },
-    { code: 'sonra2017', label: '5.12.2017 tarihinden itibaren' }
+    { code: 'once2017', label: '5.12.2017 öncesi' },
+    { code: 'sonra2017', label: '5.12.2017 ve sonrası' }
   ];
 
   // Eşleştirme sırasız yapılır: (x, y) çifti hem "Baba-Anne" hem "Anne-Baba"
@@ -150,8 +140,8 @@
   //   donem: undefined | 'once2017' | 'sonra2017'  (5.12.2017 ayrımı)
   //   x, y : kod kümeleri (biri x'ten, diğeri y'den olmalı)
   // Not: 2. satır tabloda "5510, 4/I-(a), 4/I-(b), 4/I-(c)" olarak yazılıdır;
-  // 4/I-(b.4) bu satırda ayrıca sayılmadığından buraya eklenmemiştir
-  // (Excel'e sadık kalınır; motor bu durumu sonuçta açıklar).
+  // 4/I-(b.4) bu satırda ayrıca sayılmadığından eklenmemiştir (motor bu
+  // durumu cevapta açıklar).
   var FIVE510 = ['A', 'B', 'C'];
   var AB_RULES = [
     { row: 2, tarih: 'sonra', x: FIVE510, y: FIVE510, sonuc: 'yuksekTamDusukYarim' },
@@ -168,30 +158,10 @@
   ];
 
   var AB_SONUC = {
-    yuksekTamDusukYarim: {
-      key: 'yuksekTamDusukYarim',
-      title: 'Yüksek aylık tam, düşük aylık yarım',
-      tone: 'info',
-      text: 'Anne ve babadan hak kazanılan aylıklardan yüksek olanın tamamı, düşük olanın yarısı bağlanır.'
-    },
-    tercihTam: {
-      key: 'tercihTam',
-      title: 'Tercih edilen aylık (tam)',
-      tone: 'warn',
-      text: 'İki aylık birlikte bağlanmaz; tercih edilen aylık tam olarak bağlanır.'
-    },
-    ikiTam: {
-      key: 'ikiTam',
-      title: 'İki tam aylık',
-      tone: 'good',
-      text: 'Anne ve babadan hak kazanılan her iki aylık da tam olarak bağlanır.'
-    },
-    yuksekOlan: {
-      key: 'yuksekOlan',
-      title: 'Yüksek olan aylık',
-      tone: 'warn',
-      text: 'Yalnızca yüksek olan aylık bağlanır.'
-    }
+    yuksekTamDusukYarim: { key: 'yuksekTamDusukYarim', title: 'Yüksek aylık tam, düşük aylık yarım bağlanır.', tone: 'info' },
+    tercihTam: { key: 'tercihTam', title: 'Tercih edilen aylık tam bağlanır.', tone: 'warn' },
+    ikiTam: { key: 'ikiTam', title: 'İki tam aylık bağlanır.', tone: 'good' },
+    yuksekOlan: { key: 'yuksekOlan', title: 'Yüksek olan aylık bağlanır.', tone: 'warn' }
   };
 
   /* ------------------------------------------------------------------ */
@@ -200,14 +170,14 @@
 
   var DUL_STATUS = [
     { code: '506', kurum: 'SSK / 4-a', label: '506 sayılı Kanun (SSK)', excel: '506' },
-    { code: 'A', kurum: 'SSK / 4-a', label: '5510 sayılı Kanun 4/I-(a)', kisa: '5510 4/I-(a)', excel: '5510, 4/I-(a)' },
+    { code: 'A', kurum: 'SSK / 4-a', label: '5510 4/I-(a)', excel: '5510, 4/I-(a)' },
     { code: '1479', kurum: 'Bağ-Kur / 4-b', label: '1479 sayılı Kanun (Bağ-Kur)', excel: '1479' },
-    { code: 'B', kurum: 'Bağ-Kur / 4-b', label: '5510 sayılı Kanun 4/I-(b)', kisa: '5510 4/I-(b)', excel: '5510, 4/I-(b)' },
+    { code: 'B', kurum: 'Bağ-Kur / 4-b', label: '5510 4/I-(b)', excel: '5510, 4/I-(b)' },
     { code: '2926', kurum: 'Tarım', label: '2926 sayılı Kanun (Tarım Bağ-Kur)', excel: '2926' },
-    { code: 'BT', kurum: 'Tarım', label: '5510 sayılı Kanun 4/I-(b.4) (Tarım)', excel: '5510, 4/I-(b.4)' },
+    { code: 'BT', kurum: 'Tarım', label: '5510 4/I-(b.4) Tarım', excel: '5510, 4/I-(b.4)' },
     { code: '2925', kurum: 'Tarım', label: '2925 sayılı Kanun (Tarım SSK)', excel: '2925' },
     { code: '5434', kurum: 'Emekli Sandığı / 4-c', label: '5434 sayılı Kanun (Emekli Sandığı)', excel: '5434' },
-    { code: 'C', kurum: 'Emekli Sandığı / 4-c', label: '5510 sayılı Kanun 4/I-(c)', kisa: '5510 4/I-(c)', excel: '5510, 4/I-(c)' },
+    { code: 'C', kurum: 'Emekli Sandığı / 4-c', label: '5510 4/I-(c)', excel: '5510, 4/I-(c)' },
     { code: 'BS', kurum: 'Banka Sandığı', label: 'Banka Sandığı', excel: 'Banka Sandığı' }
   ];
 
@@ -231,18 +201,8 @@
   ];
 
   var DUL_SONUC = {
-    tercih: {
-      key: 'tercih',
-      title: 'Tercih Edilen Aylık',
-      tone: 'warn',
-      text: 'İki eşten aylıklar birlikte bağlanmaz; dul eşe tercih ettiği aylık bağlanır.'
-    },
-    iki: {
-      key: 'iki',
-      title: 'İki Aylık',
-      tone: 'good',
-      text: 'Dul eşe ölen her iki eşinden de aylık bağlanır.'
-    }
+    tercih: { key: 'tercih', title: 'Tercih edilen aylık bağlanır.', tone: 'warn' },
+    iki: { key: 'iki', title: 'İki aylık bağlanır.', tone: 'good' }
   };
 
   // Excel'in "dul eşe" sayfasında 11. satırda yer alan dipnotlar

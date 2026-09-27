@@ -4,182 +4,112 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Çift Aylık Sorgusu</title>
-  <meta name="description" content="Ölen eşinden, anne ve babasından ya da birden fazla eşinden aylığa hak kazanan kadına iki aylık mı tek aylık mı bağlanacağını kaynak tabloya göre gösterir.">
+  <meta name="description" content="Ölen eşinden, anne ve babasından ya da iki eşinden aylığa hak kazanan kadına iki aylık mı tek aylık mı bağlanacağını kaynak tabloya göre gösterir.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&display=swap">
   <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
-  <a class="skip" href="#main">İçeriğe geç</a>
-
-  <header class="masthead">
+  <header class="top">
     <div class="wrap">
-      <p class="eyebrow">Ölüm aylığı · Hak sahibi kadınlar</p>
-      <h1>Çift Aylık Sorgusu</h1>
-      <p class="lede">Ölen eşinden, anne ve babasından ya da birden fazla eşinden aylığa hak kazanan kadına iki aylık mı tek aylık mı bağlanacağını, kaynak tablodaki satıra dayanarak gösterir.</p>
+      <div class="brand">Çift Aylık Sorgusu</div>
+      <nav class="modes" role="tablist" aria-label="Sorgu türü">
+        <button type="button" role="tab" id="tab-esAnneBaba" aria-controls="panel-esAnneBaba" aria-selected="true" data-tab="esAnneBaba">Eşten ve anne-babadan</button>
+        <button type="button" role="tab" id="tab-anneBaba" aria-controls="panel-anneBaba" aria-selected="false" tabindex="-1" data-tab="anneBaba">Anne ve babadan</button>
+        <button type="button" role="tab" id="tab-dulEs" aria-controls="panel-dulEs" aria-selected="false" tabindex="-1" data-tab="dulEs">İki eşten</button>
+      </nav>
     </div>
   </header>
 
-  <nav class="tabs wrap" aria-label="Sorgu türleri">
-    <div class="tablist" role="tablist">
-      <button type="button" role="tab" id="tab-esAnneBaba" aria-controls="panel-esAnneBaba" aria-selected="true" data-tab="esAnneBaba">
-        <span class="tab-title">Eşten ve anne-babadan</span>
-        <span class="tab-sub">Ölen eş + ölen anne/baba</span>
-      </button>
-      <button type="button" role="tab" id="tab-anneBaba" aria-controls="panel-anneBaba" aria-selected="false" tabindex="-1" data-tab="anneBaba">
-        <span class="tab-title">Anne ve babadan</span>
-        <span class="tab-sub">Kız çocuğu, her iki ebeveyn</span>
-      </button>
-      <button type="button" role="tab" id="tab-dulEs" aria-controls="panel-dulEs" aria-selected="false" tabindex="-1" data-tab="dulEs">
-        <span class="tab-title">İki eşten</span>
-        <span class="tab-sub">Dul eş, iki ölen eş</span>
-      </button>
-    </div>
-  </nav>
+  <main class="wrap">
 
-  <main id="main" class="wrap">
-
-    <!-- 1) Eşten ve anne-babadan -->
     <section class="panel" id="panel-esAnneBaba" role="tabpanel" aria-labelledby="tab-esAnneBaba">
-      <p class="panel-intro">Kaynak sayfa: <span class="mono">eşten-anne-babadan</span>. Ölen eşinden aylık alan (veya alacak) bir kadının, ölen anne ya da babasından da aylığa hak kazanması halinde iki aylığın birlikte bağlanıp bağlanmayacağını gösterir.</p>
-      <div class="grid">
-        <form class="case" id="form-esAnneBaba" autocomplete="off">
-          <h2>Vaka bilgileri</h2>
+      <h1>Eşten ve anne-babadan aylık</h1>
+      <p class="sub">Ölen eşinden ve ölen anne ya da babasından aylığa hak kazanan kadın için.</p>
 
-          <div class="field">
-            <label for="es-es">Ölen eşin sigorta statüsü</label>
-            <select id="es-es" name="es"></select>
-            <p class="hint" id="es-es-hint"></p>
+      <form id="form-esAnneBaba" autocomplete="off">
+        <div class="q">
+          <label for="es-es">Ölen eş</label>
+          <select id="es-es" name="es"></select>
+        </div>
+        <div class="q">
+          <label for="es-ab">Ölen anne veya baba</label>
+          <select id="es-ab" name="ab"></select>
+        </div>
+        <fieldset class="q" id="es-once-field" hidden>
+          <legend>Anne veya babadan 1.10.2008'den önce aylık bağlanmış mıydı?</legend>
+          <div class="options">
+            <label><input type="radio" name="es-once" id="es-once-evet" value="evet"> Evet</label>
+            <label><input type="radio" name="es-once" id="es-once-hayir" value="hayir"> Hayır</label>
           </div>
+          <p class="help">Aylık sonradan kesilmiş olsa bile "Evet" seçin.</p>
+        </fieldset>
+      </form>
 
-          <div class="field">
-            <label for="es-ab">Ölen anne / babanın sigorta statüsü</label>
-            <select id="es-ab" name="ab"></select>
-            <p class="hint" id="es-ab-hint"></p>
-          </div>
+      <div class="answer" id="result-esAnneBaba" aria-live="polite"></div>
 
-          <fieldset class="field" id="es-once-field">
-            <legend>Anne / babadan 1.10.2008 öncesi aylık bağlanmış mı?</legend>
-            <p class="hint">Hak sahipliğinin kaybedilmesi nedeniyle kesilme dahil.</p>
-            <div class="choices">
-              <label class="choice"><input type="radio" name="es-once" id="es-once-evet" value="evet"><span>Evet</span></label>
-              <label class="choice"><input type="radio" name="es-once" id="es-once-hayir" value="hayir"><span>Hayır</span></label>
-            </div>
-            <p class="hint field-note" id="es-once-note"></p>
-          </fieldset>
-
-          <div class="actions">
-            <button type="button" class="btn-secondary" id="es-reset">Seçimleri temizle</button>
-          </div>
-        </form>
-
-        <div class="result" id="result-esAnneBaba" aria-live="polite"></div>
-      </div>
-
-      <details class="fulltable" id="table-esAnneBaba">
-        <summary>Tablonun tamamı <span class="count" id="count-esAnneBaba"></span></summary>
+      <details class="source" id="table-esAnneBaba">
+        <summary>Kaynak tablo</summary>
         <div class="scroll"></div>
       </details>
     </section>
 
-    <!-- 2) Anne ve babadan -->
     <section class="panel" id="panel-anneBaba" role="tabpanel" aria-labelledby="tab-anneBaba" hidden>
-      <p class="panel-intro">Kaynak sayfa: <span class="mono">anne-babadan</span> (Tablo-6). Hem annesi hem babası ölen ve her ikisinden de aylığa hak kazanan kız çocuğuna aylıkların nasıl bağlanacağını gösterir.</p>
-      <div class="grid">
-        <form class="case" id="form-anneBaba" autocomplete="off">
-          <h2>Vaka bilgileri</h2>
+      <h1>Anne ve babadan aylık</h1>
+      <p class="sub">Annesi ve babası ölen, her ikisinden de aylığa hak kazanan kız çocuğu için.</p>
 
-          <div class="field">
-            <label for="ab-baba">Babanın sigorta statüsü</label>
-            <select id="ab-baba" name="baba"></select>
-          </div>
+      <form id="form-anneBaba" autocomplete="off">
+        <div class="q">
+          <label for="ab-baba">Baba</label>
+          <select id="ab-baba" name="baba"></select>
+        </div>
+        <div class="q">
+          <label for="ab-anne">Anne</label>
+          <select id="ab-anne" name="anne"></select>
+        </div>
+        <fieldset class="q">
+          <legend>Ölüm tarihleri</legend>
+          <div class="options stack" id="ab-tarih-choices"></div>
+        </fieldset>
+        <fieldset class="q" id="ab-donem-field" hidden>
+          <legend>Uygulama dönemi</legend>
+          <div class="options" id="ab-donem-choices"></div>
+        </fieldset>
+      </form>
 
-          <div class="field">
-            <label for="ab-anne">Annenin sigorta statüsü</label>
-            <select id="ab-anne" name="anne"></select>
-          </div>
+      <div class="answer" id="result-anneBaba" aria-live="polite"></div>
 
-          <fieldset class="field">
-            <legend>Ölüm tarihleri</legend>
-            <div class="choices stack" id="ab-tarih-choices"></div>
-          </fieldset>
-
-          <fieldset class="field" id="ab-donem-field" hidden>
-            <legend>Uygulama dönemi</legend>
-            <p class="hint">Tablo, bu çift için 5.12.2017 tarihi öncesi ve sonrasında farklı sonuç verir.</p>
-            <div class="choices" id="ab-donem-choices"></div>
-            <p class="hint field-note" id="ab-donem-note"></p>
-          </fieldset>
-
-          <div class="actions">
-            <button type="button" class="btn-secondary" id="ab-reset">Seçimleri temizle</button>
-          </div>
-        </form>
-
-        <div class="result" id="result-anneBaba" aria-live="polite"></div>
-      </div>
-
-      <details class="fulltable" id="table-anneBaba">
-        <summary>Tablonun tamamı <span class="count" id="count-anneBaba"></span></summary>
+      <details class="source" id="table-anneBaba">
+        <summary>Kaynak tablo</summary>
         <div class="scroll"></div>
-        <p class="caption" id="caption-anneBaba"></p>
       </details>
     </section>
 
-    <!-- 3) İki eşten (dul eş) -->
     <section class="panel" id="panel-dulEs" role="tabpanel" aria-labelledby="tab-dulEs" hidden>
-      <p class="panel-intro">Kaynak sayfa: <span class="mono">dul eşe</span>. Birden fazla evlilik yapmış ve ölen her iki eşinden de aylığa hak kazanan dul eşe hangi aylığın bağlanacağını gösterir.</p>
-      <div class="grid">
-        <form class="case" id="form-dulEs" autocomplete="off">
-          <h2>Vaka bilgileri</h2>
+      <h1>İki eşten aylık</h1>
+      <p class="sub">Ölen iki eşinden de aylığa hak kazanan dul eş için.</p>
 
-          <div class="field">
-            <label for="dul-ilk">Ölen ilk eşin sigortalılık statüsü / uygulanacak kanun</label>
-            <select id="dul-ilk" name="ilk"></select>
-          </div>
+      <form id="form-dulEs" autocomplete="off">
+        <div class="q">
+          <label for="dul-ilk">Ölen ilk eş</label>
+          <select id="dul-ilk" name="ilk"></select>
+        </div>
+        <div class="q">
+          <label for="dul-ikinci">Ölen ikinci eş</label>
+          <select id="dul-ikinci" name="ikinci"></select>
+        </div>
+      </form>
 
-          <div class="field">
-            <label for="dul-ikinci">Ölen ikinci eşin sigortalılık statüsü / uygulanacak kanun</label>
-            <select id="dul-ikinci" name="ikinci"></select>
-          </div>
+      <div class="answer" id="result-dulEs" aria-live="polite"></div>
 
-          <div class="actions">
-            <button type="button" class="btn-secondary" id="dul-reset">Seçimleri temizle</button>
-          </div>
-
-          <div class="notes" id="dul-notlar">
-            <h3>Tablo dipnotları</h3>
-          </div>
-        </form>
-
-        <div class="result" id="result-dulEs" aria-live="polite"></div>
-      </div>
-
-      <details class="fulltable" id="table-dulEs">
-        <summary>Tablonun tamamı <span class="count" id="count-dulEs"></span></summary>
+      <details class="source" id="table-dulEs">
+        <summary>Kaynak tablo</summary>
         <div class="scroll"></div>
       </details>
     </section>
 
-    <section class="glossary">
-      <h2>Tabloda geçen kısaltmalar</h2>
-      <dl class="terms">
-        <div><dt>SSK · 506 sayılı Kanun</dt><dd>Hizmet akdiyle çalışanlar. 5510 sayılı Kanun'da karşılığı 4/I-(a).</dd></div>
-        <div><dt>Bağ-Kur · 1479 sayılı Kanun</dt><dd>Bağımsız çalışanlar. 5510 sayılı Kanun'da karşılığı 4/I-(b).</dd></div>
-        <div><dt>Tarım SSK · 2925 sayılı Kanun</dt><dd>Tarımda hizmet akdiyle çalışanlar. Tabloda ölüm tarihinin önemi yoktur.</dd></div>
-        <div><dt>Tarım Bağ-Kur · 2926 sayılı Kanun</dt><dd>Tarımda bağımsız çalışanlar. 5510 sayılı Kanun'da karşılığı 4/I-(b) Tarım, yani 4/I-(b.4).</dd></div>
-        <div><dt>Emekli Sandığı · 5434 sayılı Kanun</dt><dd>Kamu görevlileri. 5510 sayılı Kanun'da karşılığı 4/I-(c); tabloda 4/I-(c) için "14.10.2008 sonrası" ölüm aranır.</dd></div>
-        <div><dt>Banka Sandığı (Aktif / Devir)</dt><dd>Banka ve sigorta şirketi sandıkları. "Aktif" SGK'ya devredilmemiş, "Devir" SGK'ya devredilmiş sandığı anlatır.</dd></div>
-        <div><dt>1.10.2008 · 30.9.2008</dt><dd>5510 sayılı Kanun'un yürürlük eşiği. Tabloda "1.10.2008 öncesi" eski kanunu, "30.9.2008 sonrası" 5510 sayılı Kanun'u ifade eder.</dd></div>
-        <div><dt>5.12.2017</dt><dd>Tablo-6'da, her iki ölümün de 1.10.2008 öncesi olduğu Bağ-Kur ve Tarım Bağ-Kur çiftlerinde sonucu değiştiren uygulama dönemi eşiği.</dd></div>
-      </dl>
-    </section>
   </main>
-
-  <footer class="wrap foot">
-    <p>Kaynak: <span class="mono">kadinlara_esinden_anne_babasindan.xls</span>, 3 sayfa, 88 satır. Sonuçlar yalnızca bu tablodaki satırlara dayanır; tabloda bulunmayan kombinasyonlar için yorum yapılmaz, "tabloda karşılığı yok" denir.</p>
-  </footer>
 
   <script src="js/excel-rows.js"></script>
   <script src="js/rules.js"></script>

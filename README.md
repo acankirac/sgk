@@ -16,9 +16,9 @@ kombinasyonlar için yorum yapmaz, "tabloda karşılığı yok" der.
 | Anne ve babadan | `anne-babadan`, Tablo-6 (11 satır) | Baba ve annenin statüsü, ölüm tarihleri durumu, gerekirse 5.12.2017 uygulama dönemi | Yüksek tam-düşük yarım / Tercih edilen (tam) / İki tam aylık / Yüksek olan |
 | İki eşten | `dul eşe` (16 satır) | Ölen ilk ve ikinci eşin tabi olduğu kanun | Tercih edilen aylık / İki aylık |
 
-Her sonuç, dayanak olan Excel satırını (sayfa adı + satır numarası) hücre
-metinleriyle birlikte gösterir; "Tabloda göster" bağlantısı satırı tam tablo
-görünümünde vurgular.
+Cevabın altında dayanak olan Excel satırının numarası yer alır; bağlantı,
+satırı sayfanın altındaki kaynak tabloda vurgular. Evet/Hayır ve 5.12.2017
+soruları yalnızca sonucu etkilediğinde görünür.
 
 ## Çalıştırma
 
