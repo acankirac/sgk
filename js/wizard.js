@@ -160,14 +160,14 @@
     var live = el('div', { role: 'status' });
     root.appendChild(live);
 
-    var rows = [], speakText = '', printAnswer = '', printPlain = '';
+    var rows = [], speakText = '', printAnswer = '', printPlain = '', printTone = 'none';
     if (!out.dual) {
       var ans = answerOf(out.res);
       rows = out.res.rows || [];
       live.appendChild(el('p', { class: 'answer-big ' + ans.tone, text: ans.text }));
       if (ans.plain) { live.appendChild(el('p', { class: 'plain', text: ans.plain })); }
       speakText = ans.text + ' ' + ans.plain;
-      printAnswer = ans.text; printPlain = ans.plain;
+      printAnswer = ans.text; printPlain = ans.plain; printTone = ans.tone.replace('tone-', '');
       if (rows.length) {
         root.appendChild(el('p', { class: 'src' }, ['Kaynak tablo, '].concat(UI.rowLinks(modul, rows))));
         root.appendChild(UI.rowCard(modul, rows));
@@ -227,7 +227,8 @@
       facts: facts.map(function (f) { return [f.label, f.value + (f.code ? ' (' + f.code + ')' : '')]; }),
       answer: printAnswer,
       plain: printPlain,
-      rows: rows
+      rows: rows,
+      tone: printTone
     });
     UI.showSource(modul);
     UI.highlightRows(modul, rows.map(function (r) { return r.row; }));

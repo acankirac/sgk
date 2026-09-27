@@ -317,25 +317,44 @@
     var box = $('#print-summary');
     box.innerHTML = '';
     if (!summary) { return; }
-    box.appendChild(el('h1', { text: 'Çift Aylık Sorgusu – Sonuç Özeti' }));
-    box.appendChild(el('p', { class: 'meta', text: TITLES[summary.key] + ' · ' + todayText() }));
-    box.appendChild(el('h2', { text: 'Verilen bilgiler' }));
-    box.appendChild(el('ul', null, summary.facts.map(function (f) { return el('li', { text: f[0] + ': ' + f[1] }); })));
-    box.appendChild(el('h2', { text: 'Sonuç' }));
-    box.appendChild(el('p', { class: 'big', text: summary.answer }));
-    if (summary.plain) { box.appendChild(el('p', { text: summary.plain })); }
+    var tone = summary.tone || 'none';
+
+    box.appendChild(el('header', { class: 'p-head' }, [
+      el('div', { class: 'p-brand' }, [el('span', { class: 'p-mark', 'aria-hidden': 'true' }), 'Çift Aylık Sorgusu']),
+      el('div', { class: 'p-meta' }, [el('div', { text: 'Sonuç özeti' }), el('div', { text: todayText() })])
+    ]));
+
+    box.appendChild(el('h1', { class: 'p-title', text: TITLES[summary.key] }));
+
+    var result = el('section', { class: 'p-result tone-' + tone }, [
+      el('div', { class: 'p-label', text: 'Sonuç' }),
+      el('p', { class: 'p-answer', text: summary.answer })
+    ]);
+    if (summary.plain) { result.appendChild(el('p', { class: 'p-plain', text: summary.plain })); }
+    box.appendChild(result);
+
+    box.appendChild(el('h2', { class: 'p-h2', text: 'Verilen bilgiler' }));
+    box.appendChild(el('table', { class: 'p-facts' }, [el('tbody', null, summary.facts.map(function (f) {
+      return el('tr', null, [el('th', { scope: 'row', text: f[0] }), el('td', { text: f[1] })]);
+    }))]));
+
     if (summary.rows && summary.rows.length) {
       var sheet = EXCEL[summary.key];
       summary.rows.forEach(function (rule) {
         var r = excelRow(summary.key, rule.row);
         if (!r) { return; }
-        box.appendChild(el('h2', { text: 'Dayanak: kaynak tablo "' + sheetName(summary.key) + '", satır ' + rule.row }));
-        box.appendChild(el('table', null, sheet.header.map(function (h, i) {
-          return el('tr', null, [el('th', { text: h }), el('td', { text: r.cells[i] || '' })]);
-        })));
+        box.appendChild(el('h2', { class: 'p-h2', text: 'Dayanak' }));
+        box.appendChild(el('p', { class: 'p-sub', text: 'Kaynak tablo "' + sheetName(summary.key) + '", satır ' + rule.row }));
+        box.appendChild(el('table', { class: 'p-row' }, [el('tbody', null, sheet.header.map(function (h, i) {
+          return el('tr', { class: i === sheet.header.length - 1 ? 'last' : '' }, [el('th', { scope: 'row', text: h }), el('td', { text: r.cells[i] || '' })]);
+        }))]));
       });
     }
-    box.appendChild(el('p', { class: 'note', text: TEXTS.NONE.printNote + ' ' + metaText() + '.' }));
+
+    box.appendChild(el('footer', { class: 'p-foot' }, [
+      el('p', { text: TEXTS.NONE.printNote }),
+      el('p', { text: metaText() })
+    ]));
   }
 
   function summaryText() {
@@ -513,7 +532,7 @@
       box.appendChild(el('p', { class: 'verdict tone-' + res.sonuc.tone, text: res.sonuc.title }));
       box.appendChild(el('p', { class: 'src' }, ['Kaynak tablo, '].concat(rowLinks(key, rows))));
       box.appendChild(rowCard(key, rows));
-      summary = { key: key, facts: facts, answer: res.sonuc.title, plain: '', rows: rows };
+      summary = { key: key, facts: facts, answer: res.sonuc.title, plain: '', rows: rows, tone: res.sonuc.tone };
     } else if (res.status === 'none') {
       box.appendChild(el('p', { class: 'verdict tone-none', text: 'Tabloda bu durum için satır yok.' }));
       if (res.reason) { box.appendChild(el('p', { class: 'src', text: res.reason })); }
