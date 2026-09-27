@@ -1,0 +1,15 @@
+{
+  "name": "Çift Aylık Sorgusu",
+  "short_name": "Çift Aylık",
+  "description": "Eşten, anne-babadan veya iki eşten aylık: iki aylık mı tek aylık mı?",
+  "lang": "tr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1f4e9c",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
