@@ -312,6 +312,24 @@
   }
 
   // summary: { key, facts: [[etiket, değer]], answer, plain, rows }
+  // Üst banttaki marka bloğunun kopyası (yazdırma başlığı için)
+  function brandNode() {
+    var node = $('.top .brand').cloneNode(true);
+    node.className = 'p-brand';
+    node.removeAttribute('id');
+    var k = node.querySelector('.kurum'); if (k) { k.removeAttribute('id'); }
+    return node;
+  }
+
+  // Kurum logosu yalnızca js/config.js içinde tanımlıysa gösterilir
+  function initKurum() {
+    var cfg = window.SGK_CONFIG || {};
+    if (!cfg.kurumLogo) { return; }
+    var box = $('#kurum');
+    box.appendChild(el('img', { src: cfg.kurumLogo, alt: cfg.kurumAdi || 'Kurum logosu' }));
+    box.hidden = false;
+  }
+
   function setPrintSummary(summary) {
     lastSummary = summary;
     var box = $('#print-summary');
@@ -320,7 +338,7 @@
     var tone = summary.tone || 'none';
 
     box.appendChild(el('header', { class: 'p-head' }, [
-      el('div', { class: 'p-brand' }, [el('span', { class: 'p-mark', 'aria-hidden': 'true' }), 'Çift Aylık Sorgusu']),
+      brandNode(),
       el('div', { class: 'p-meta' }, [el('div', { text: 'Sonuç özeti' }), el('div', { text: todayText() })])
     ]));
 
@@ -674,6 +692,7 @@
     print: function () { if (canPrint) { window.print(); } }
   };
 
+  initKurum();
   TABS.forEach(buildTable);
   initSize();
   initForms();

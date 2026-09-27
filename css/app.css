@@ -144,31 +144,20 @@ button { font-family: inherit; }
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-right: auto;
-  font-weight: 600;
-  font-size: 1.15rem;
-  letter-spacing: -0.005em;
+  min-width: 0;
 }
-.mark {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  background: var(--brand-text);
-  position: relative;
-  flex: none;
-}
-.mark::before, .mark::after {
-  content: "";
-  position: absolute;
-  left: 6px;
-  right: 6px;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--brand);
-}
-.mark::before { top: 6px; }
-.mark::after { bottom: 6px; opacity: 0.55; }
+.logo { width: 40px; height: 40px; flex: none; color: #ffffff; }
+.logo .logo-bg { fill: rgba(255, 255, 255, 0.1); stroke: rgba(255, 255, 255, 0.28); stroke-width: 1.5; }
+.logo .logo-ink { fill: var(--brand); }
+.wordmark { display: flex; flex-direction: column; gap: 2px; line-height: 1.15; }
+.wm-name { font-size: 1.2rem; font-weight: 400; letter-spacing: -0.01em; }
+.wm-name b { font-weight: 600; }
+.wm-sub { font-size: 0.8rem; color: rgba(255, 255, 255, 0.72); letter-spacing: 0.02em; }
+.kurum { display: inline-flex; align-items: center; padding-right: 12px; margin-right: 2px; border-right: 1px solid var(--brand-line); }
+.kurum img { height: 40px; width: auto; display: block; background: #ffffff; border-radius: 6px; padding: 3px; }
+@media (max-width: 420px) { .wm-sub { display: none; } .logo { width: 34px; height: 34px; } }
 
 .tools { display: flex; align-items: center; gap: 8px; }
 .tools button {
@@ -477,11 +466,15 @@ table.grid td button { font: inherit; background: none; border: 0; color: inheri
   #print-summary { display: block !important; max-width: none; padding: 0; }
 
   .p-head { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 8pt; border-bottom: 2pt solid #1e3a5f; }
-  .p-brand { display: inline-flex; align-items: center; gap: 7pt; font-weight: 600; font-size: 13pt; color: #1e3a5f; }
-  .p-mark { display: inline-block; width: 13pt; height: 13pt; border-radius: 3pt; background: #1e3a5f; position: relative; }
-  .p-mark::before, .p-mark::after { content: ""; position: absolute; left: 3pt; right: 3pt; height: 2pt; border-radius: 1pt; background: #fff; }
-  .p-mark::before { top: 3.5pt; }
-  .p-mark::after { bottom: 3.5pt; opacity: 0.6; }
+  .p-brand { display: inline-flex; align-items: center; gap: 8pt; color: #1e3a5f; }
+  .p-brand .logo { width: 26pt; height: 26pt; color: #1e3a5f; }
+  .p-brand .logo .logo-bg { fill: #1e3a5f; stroke: none; }
+  .p-brand .logo-ink { fill: #1e3a5f; }
+  .p-brand .wordmark { line-height: 1.15; }
+  .p-brand .wm-name { font-size: 13pt; color: #1e3a5f; }
+  .p-brand .wm-sub { font-size: 8.5pt; color: #5b6675; }
+  .p-brand .kurum { border-right-color: #c9d2df; }
+  .p-brand .kurum img { height: 26pt; padding: 0; }
   .p-meta { text-align: right; font-size: 9.5pt; color: #5b6675; line-height: 1.35; }
 
   .p-title { margin: 18pt 0 0; font-size: 19pt; font-weight: 600; letter-spacing: -0.01em; color: #111827; }

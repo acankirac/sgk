@@ -142,3 +142,17 @@ Testler şunları garanti eder:
   bağımsızdır (baba/anne ve ilk/ikinci eş yer değiştirebilir).
 - Uygulama hukuki yorum, kanun maddesi veya aylık tutarı üretmez; kişisel veri
   istemez ve hiçbir veriyi sunucuya göndermez.
+
+## Marka ve kurum logosu
+
+Uygulamanın kendi logosu `assets/icon.svg` (üst bant, sekme simgesi, telefon
+simgesi ve A4 çıktı başlığında kullanılır). Kurum logosu varsayılan olarak
+gösterilmez; kurumun yazılı izni alındıktan sonra logo dosyasını `assets/`
+altına koyup `js/config.js` içinde tanımlayın:
+
+```js
+window.SGK_CONFIG = { kurumLogo: 'assets/kurum-logo.svg', kurumAdi: 'Sosyal Güvenlik Kurumu' };
+```
+
+Logo üst bantta ve A4 çıktıda uygulama logosunun solunda, ince bir ayraçla görünür.
+
