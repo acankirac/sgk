@@ -28,7 +28,7 @@
     }
   };
 
-  var inArtifact = !!window.claude || /claude/i.test(location.hostname) ||
+  var inArtifact = !!window.SGK_IN_ARTIFACT || !!window.claude || /claude/i.test(location.hostname) ||
     (window.top !== window && /claude/i.test(document.referrer || ''));
   var canPrint = !inArtifact && typeof window.print === 'function';
 
