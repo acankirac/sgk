@@ -1,0 +1,12 @@
+{
+  "name": "sgk-cift-aylik",
+  "version": "1.0.0",
+  "description": "Hak sahibi kadınlara eşinden, anne-babasından veya iki eşinden bağlanacak aylıkları kaynak Excel tablosuna göre sorgulayan statik web uygulaması",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "start": "python3 -m http.server 8080",
+    "extract": "python3 scripts/extract_excel.py"
+  },
+  "license": "UNLICENSED"
+}
