@@ -46,8 +46,10 @@ statü çapraz görünüm, arama kutusu) bulunur.
 - Çevrimdışı çalışma: `manifest.webmanifest` + `sw.js` ile uygulama dosyaları
   önbelleğe alınır; telefon ana ekranına eklenebilir. Önbellek adı kaynak
   tablonun sürüm damgasından türetilir, tablo değişince eski önbellek silinir.
-- Kaynak tablo sürüm damgası (dosya özeti, çıkarım tarihi, satır sayısı) sayfa
-  altında, yazdırma özetinde ve kopyalanan metinde yer alır.
+- Kaynak tablo sürüm damgası (dosya özeti, çıkarım tarihi, satır sayısı)
+  yazdırma özetinde ve kopyalanan metinde yer alır; ekranda gösterilmez.
+- Yazı tipi IBM Plex Sans (SIL Open Font License), `assets/fonts/` altında yerel
+  kopya; dış istek yapılmaz.
 
 ## Çalıştırma
 
@@ -66,6 +68,7 @@ GitHub Pages için: Settings → Pages → "Deploy from a branch", kök dizin.
 ```
 index.html            Arayüz iskeleti (adım adım + hızlı giriş + kaynak tablolar)
 css/app.css           Stil (açık/koyu tema, yazı boyutu kademeleri, yazdırma)
+css/fonts.css         Yerel yazı tipi tanımları (assets/fonts/)
 js/excel-rows.js      Excel satırlarının ham metni ve sürüm damgası (üretilir)
 js/rules.js           Excel satırlarının kodlanmış hali (statü kodları, kurallar)
 js/engine.js          Eşleştirme motoru (arayüzden bağımsız)

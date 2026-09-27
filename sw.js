@@ -3,7 +3,8 @@
 importScripts('./js/excel-rows.js');
 var CACHE = 'cift-aylik-' + ((self.SGK_EXCEL && self.SGK_EXCEL.meta && self.SGK_EXCEL.meta.sha256) || 'v1');
 var ASSETS = [
-  './', './index.html', './css/app.css',
+  './', './index.html', './css/app.css', './css/fonts.css',
+  './assets/fonts/ibm-plex-sans-latin.woff2', './assets/fonts/ibm-plex-sans-latin-ext.woff2',
   './js/excel-rows.js', './js/rules.js', './js/engine.js', './js/derive.js', './js/texts.js', './js/wizard-steps.js', './js/app.js', './js/wizard.js',
   './manifest.webmanifest', './assets/icon.svg', './assets/icon-192.png', './assets/icon-512.png'
 ];

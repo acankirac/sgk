@@ -5,102 +5,105 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Çift Aylık Sorgusu</title>
   <meta name="description" content="Ölen eşinden, anne ve babasından ya da iki eşinden aylığa hak kazanan kadına iki aylık mı tek aylık mı bağlanacağını kaynak tabloya göre gösterir.">
-  <meta name="theme-color" content="#1f4e9c">
+  <meta name="theme-color" content="#1e3a5f">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/app.css">
 </head>
 <body data-mode="wizard">
   <header class="top">
-    <div class="wrap">
-      <div class="brand">Çift Aylık Sorgusu</div>
+    <div class="wrap top-row">
+      <div class="brand"><span class="mark" aria-hidden="true"></span>Çift Aylık Sorgusu</div>
       <div class="tools">
         <button type="button" id="font-minus" aria-label="Yazıyı küçült" title="Yazıyı küçült">A−</button>
         <button type="button" id="font-plus" aria-label="Yazıyı büyüt" title="Yazıyı büyüt">A+</button>
         <button type="button" id="mode-toggle" aria-pressed="false">Hızlı giriş</button>
       </div>
-      <nav class="modes" id="modes" role="tablist" aria-label="Sorgu türü" hidden>
-        <button type="button" role="tab" id="tab-esAnneBaba" aria-controls="panel-esAnneBaba" aria-selected="true" data-tab="esAnneBaba">Eşten ve anne-babadan</button>
-        <button type="button" role="tab" id="tab-anneBaba" aria-controls="panel-anneBaba" aria-selected="false" tabindex="-1" data-tab="anneBaba">Anne ve babadan</button>
-        <button type="button" role="tab" id="tab-dulEs" aria-controls="panel-dulEs" aria-selected="false" tabindex="-1" data-tab="dulEs">İki eşten</button>
-      </nav>
     </div>
+    <nav class="wrap modes" id="modes" role="tablist" aria-label="Sorgu türü" hidden>
+      <button type="button" role="tab" id="tab-esAnneBaba" aria-controls="panel-esAnneBaba" aria-selected="true" data-tab="esAnneBaba">Eşten ve anne-babadan</button>
+      <button type="button" role="tab" id="tab-anneBaba" aria-controls="panel-anneBaba" aria-selected="false" tabindex="-1" data-tab="anneBaba">Anne ve babadan</button>
+      <button type="button" role="tab" id="tab-dulEs" aria-controls="panel-dulEs" aria-selected="false" tabindex="-1" data-tab="dulEs">İki eşten</button>
+    </nav>
   </header>
 
   <main class="wrap">
+    <div class="sheet">
 
-    <!-- Adım adım mod -->
-    <section class="wiz" id="wizard"></section>
+      <!-- Adım adım mod -->
+      <section class="wiz" id="wizard"></section>
 
-    <!-- Hızlı giriş modu -->
-    <section id="expert" hidden>
+      <!-- Hızlı giriş modu -->
+      <section id="expert" hidden>
 
-      <section class="panel" id="panel-esAnneBaba" role="tabpanel" aria-labelledby="tab-esAnneBaba">
-        <h1>Eşten ve anne-babadan aylık</h1>
-        <p class="sub">Ölen eşinden ve ölen anne ya da babasından aylığa hak kazanan kadın için.</p>
-        <form id="form-esAnneBaba" autocomplete="off">
-          <div class="q">
-            <label for="es-es">Ölen eş</label>
-            <select id="es-es" name="es"></select>
-          </div>
-          <div class="q">
-            <label for="es-ab">Ölen anne veya baba</label>
-            <select id="es-ab" name="ab"></select>
-          </div>
-          <fieldset class="q" id="es-once-field" hidden>
-            <legend>Anne veya babadan 1.10.2008'den önce aylık bağlanmış mıydı?</legend>
-            <div class="options">
-              <label><input type="radio" name="es-once" id="es-once-evet" value="evet"> Evet</label>
-              <label><input type="radio" name="es-once" id="es-once-hayir" value="hayir"> Hayır</label>
+        <section class="panel" id="panel-esAnneBaba" role="tabpanel" aria-labelledby="tab-esAnneBaba">
+          <h1>Eşten ve anne-babadan aylık</h1>
+          <p class="sub">Ölen eşinden ve ölen anne ya da babasından aylığa hak kazanan kadın için.</p>
+          <form id="form-esAnneBaba" autocomplete="off">
+            <div class="q">
+              <label for="es-es">Ölen eş</label>
+              <select id="es-es" name="es"></select>
             </div>
-            <p class="help">Aylık sonradan kesilmiş olsa bile "Evet" seçin.</p>
-          </fieldset>
-        </form>
-        <div class="answer" id="result-esAnneBaba" aria-live="polite"></div>
-      </section>
+            <div class="q">
+              <label for="es-ab">Ölen anne veya baba</label>
+              <select id="es-ab" name="ab"></select>
+            </div>
+            <fieldset class="q" id="es-once-field" hidden>
+              <legend>Anne veya babadan 1.10.2008'den önce aylık bağlanmış mıydı?</legend>
+              <div class="options">
+                <label><input type="radio" name="es-once" id="es-once-evet" value="evet"> Evet</label>
+                <label><input type="radio" name="es-once" id="es-once-hayir" value="hayir"> Hayır</label>
+              </div>
+              <p class="help">Aylık sonradan kesilmiş olsa bile "Evet" seçin.</p>
+            </fieldset>
+          </form>
+          <div class="answer" id="result-esAnneBaba" aria-live="polite"></div>
+        </section>
 
-      <section class="panel" id="panel-anneBaba" role="tabpanel" aria-labelledby="tab-anneBaba" hidden>
-        <h1>Anne ve babadan aylık</h1>
-        <p class="sub">Annesi ve babası ölen, her ikisinden de aylığa hak kazanan kız çocuğu için.</p>
-        <form id="form-anneBaba" autocomplete="off">
-          <div class="q">
-            <label for="ab-baba">Baba</label>
-            <select id="ab-baba" name="baba"></select>
-          </div>
-          <div class="q">
-            <label for="ab-anne">Anne</label>
-            <select id="ab-anne" name="anne"></select>
-          </div>
-          <fieldset class="q">
-            <legend>Ölüm tarihleri</legend>
-            <div class="options stack" id="ab-tarih-choices"></div>
-          </fieldset>
-          <fieldset class="q" id="ab-donem-field" hidden>
-            <legend>Uygulama dönemi</legend>
-            <div class="options" id="ab-donem-choices"></div>
-          </fieldset>
-        </form>
-        <div class="answer" id="result-anneBaba" aria-live="polite"></div>
-      </section>
+        <section class="panel" id="panel-anneBaba" role="tabpanel" aria-labelledby="tab-anneBaba" hidden>
+          <h1>Anne ve babadan aylık</h1>
+          <p class="sub">Annesi ve babası ölen, her ikisinden de aylığa hak kazanan kız çocuğu için.</p>
+          <form id="form-anneBaba" autocomplete="off">
+            <div class="q">
+              <label for="ab-baba">Baba</label>
+              <select id="ab-baba" name="baba"></select>
+            </div>
+            <div class="q">
+              <label for="ab-anne">Anne</label>
+              <select id="ab-anne" name="anne"></select>
+            </div>
+            <fieldset class="q">
+              <legend>Ölüm tarihleri</legend>
+              <div class="options stack" id="ab-tarih-choices"></div>
+            </fieldset>
+            <fieldset class="q" id="ab-donem-field" hidden>
+              <legend>Uygulama dönemi</legend>
+              <div class="options" id="ab-donem-choices"></div>
+            </fieldset>
+          </form>
+          <div class="answer" id="result-anneBaba" aria-live="polite"></div>
+        </section>
 
-      <section class="panel" id="panel-dulEs" role="tabpanel" aria-labelledby="tab-dulEs" hidden>
-        <h1>İki eşten aylık</h1>
-        <p class="sub">Ölen iki eşinden de aylığa hak kazanan dul eş için.</p>
-        <form id="form-dulEs" autocomplete="off">
-          <div class="q">
-            <label for="dul-ilk">Ölen ilk eş</label>
-            <select id="dul-ilk" name="ilk"></select>
-          </div>
-          <div class="q">
-            <label for="dul-ikinci">Ölen ikinci eş</label>
-            <select id="dul-ikinci" name="ikinci"></select>
-          </div>
-        </form>
-        <div class="answer" id="result-dulEs" aria-live="polite"></div>
-      </section>
+        <section class="panel" id="panel-dulEs" role="tabpanel" aria-labelledby="tab-dulEs" hidden>
+          <h1>İki eşten aylık</h1>
+          <p class="sub">Ölen iki eşinden de aylığa hak kazanan dul eş için.</p>
+          <form id="form-dulEs" autocomplete="off">
+            <div class="q">
+              <label for="dul-ilk">Ölen ilk eş</label>
+              <select id="dul-ilk" name="ilk"></select>
+            </div>
+            <div class="q">
+              <label for="dul-ikinci">Ölen ikinci eş</label>
+              <select id="dul-ikinci" name="ikinci"></select>
+            </div>
+          </form>
+          <div class="answer" id="result-dulEs" aria-live="polite"></div>
+        </section>
 
-    </section>
+      </section>
+    </div>
 
     <!-- Kaynak tablolar (her iki modda ortak) -->
     <section id="sources">
@@ -123,10 +126,7 @@
 
     <!-- Yalnızca yazdırırken görünür -->
     <section id="print-summary" aria-hidden="true"></section>
-
   </main>
-
-  <footer class="wrap foot"><p id="source-meta"></p></footer>
 
   <script src="js/excel-rows.js"></script>
   <script src="js/rules.js"></script>

@@ -662,7 +662,6 @@
   initMode();
   initServiceWorker();
 
-  $('#source-meta').textContent = metaText();
   var savedMode = store('sgk-mode');
   setMode(savedMode === 'expert' || parseHash().key ? 'expert' : 'wizard');
 })();
