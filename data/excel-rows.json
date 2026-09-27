@@ -928,5 +928,11 @@
         ]
       }
     ]
+  },
+  "meta": {
+    "dosya": "kadinlara_esinden_anne_babasindan.xls",
+    "sha256": "a0eed41f",
+    "cikarimTarihi": "2026-09-27",
+    "satirSayisi": 88
   }
 }

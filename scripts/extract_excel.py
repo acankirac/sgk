@@ -8,6 +8,8 @@
 Kullanım:  python3 scripts/extract_excel.py
 Gereksinim: pip install xlrd
 """
+import datetime
+import hashlib
 import json
 import pathlib
 import re
@@ -61,15 +63,27 @@ def main():
             rows.append({"row": r + 1, "cells": cells[: len(header)]})
         out[key] = {"sheet": sheet.name, "header": header, "rows": rows}
 
+    # Sürüm damgası: kaynak dosyanın özeti, çıkarım tarihi ve satır sayısı
+    digest = hashlib.sha256(SRC.read_bytes()).hexdigest()
+    out["meta"] = {
+        "dosya": SRC.name,
+        "sha256": digest[:8],
+        "cikarimTarihi": datetime.date.today().isoformat(),
+        "satirSayisi": sum(len(sheet["rows"]) for sheet in out.values() if isinstance(sheet, dict) and "rows" in sheet),
+    }
+
     JSON_OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     js = (
-        "// Bu dosya scripts/extract_excel.py tarafından üretilir; elle düzenlemeyin.\n"
+        "// Bu dosya scripts/extract_excel.py tarafından üretilir; elle düzenlenmez.\n"
         "// Kaynak: data/kadinlara_esinden_anne_babasindan.xls\n"
-        "window.SGK_EXCEL = " + json.dumps(out, ensure_ascii=False, indent=2) + ";\n"
+        "var SGK_EXCEL = " + json.dumps(out, ensure_ascii=False, indent=2) + ";\n"
+        "if (typeof self !== 'undefined') { self.SGK_EXCEL = SGK_EXCEL; }\n"
     )
     JS_OUT.write_text(js, encoding="utf-8")
     for key, sheet in out.items():
-        print(f"{key}: {sheet['sheet']!r} -> {len(sheet['rows'])} satır")
+        if key != "meta":
+            print(f"{key}: {sheet['sheet']!r} -> {len(sheet['rows'])} satır")
+    print("sürüm:", out["meta"])
 
 
 if __name__ == "__main__":

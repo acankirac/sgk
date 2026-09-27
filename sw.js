@@ -1,6 +1,7 @@
 // Çevrimdışı çalışma: uygulama dosyaları önbelleğe alınır, ağ varsa arka planda tazelenir.
-// Yeni sürüm yayınlarken CACHE adını değiştirin.
-var CACHE = 'cift-aylik-v1';
+// Önbellek adı kaynak tablonun sürüm damgasından türetilir; tablo değişince eski önbellek silinir.
+importScripts('./js/excel-rows.js');
+var CACHE = 'cift-aylik-' + ((self.SGK_EXCEL && self.SGK_EXCEL.meta && self.SGK_EXCEL.meta.sha256) || 'v1');
 var ASSETS = [
   './', './index.html', './css/app.css',
   './js/excel-rows.js', './js/rules.js', './js/engine.js', './js/derive.js', './js/app.js', './js/wizard.js',

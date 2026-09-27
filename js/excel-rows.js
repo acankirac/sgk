@@ -1,6 +1,6 @@
-// Bu dosya scripts/extract_excel.py tarafından üretilir; elle düzenlemeyin.
+// Bu dosya scripts/extract_excel.py tarafından üretilir; elle düzenlenmez.
 // Kaynak: data/kadinlara_esinden_anne_babasindan.xls
-window.SGK_EXCEL = {
+var SGK_EXCEL = {
   "esAnneBaba": {
     "sheet": "eşten-anne -babadan",
     "header": [
@@ -930,5 +930,12 @@ window.SGK_EXCEL = {
         ]
       }
     ]
+  },
+  "meta": {
+    "dosya": "kadinlara_esinden_anne_babasindan.xls",
+    "sha256": "a0eed41f",
+    "cikarimTarihi": "2026-09-27",
+    "satirSayisi": 88
   }
 };
+if (typeof self !== 'undefined') { self.SGK_EXCEL = SGK_EXCEL; }
