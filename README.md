@@ -51,8 +51,8 @@ statü çapraz görünüm, arama kutusu) bulunur.
 
 ## Çalıştırma
 
-Derleme adımı yoktur; `index.html` doğrudan açılabilir veya herhangi bir statik
-sunucuyla yayınlanabilir:
+Derleme adımı yoktur ve dış kaynak (yazı tipi, CDN, API) kullanılmaz; `index.html`
+doğrudan açılabilir, intranette veya herhangi bir statik sunucuda yayınlanabilir:
 
 ```bash
 npm start            # http://localhost:8080  (python3 -m http.server)
@@ -70,14 +70,19 @@ js/excel-rows.js      Excel satırlarının ham metni ve sürüm damgası (üret
 js/rules.js           Excel satırlarının kodlanmış hali (statü kodları, kurallar)
 js/engine.js          Eşleştirme motoru (arayüzden bağımsız)
 js/derive.js          Kurum + vefat tarihinden statü türetme (adım adım mod)
+js/texts.js           Arayüz metinleri (sonuçların sade karşılığı, kısa adlar)
+js/wizard-steps.js    Adım adım modun mantığı (soru sırası, motor girdisi; DOM'suz)
+js/wizard.js          Adım adım modun görünümü
 js/app.js             Ortak arayüz, hızlı giriş formları, kaynak tablo, yazdırma
-js/wizard.js          Adım adım mod
 sw.js, manifest.webmanifest, assets/   Çevrimdışı çalışma ve simgeler
 data/*.xls            Kaynak Excel
 data/excel-rows.json  Testlerin karşılaştırma için kullandığı ham satırlar
 scripts/extract_excel.py  Excel'den excel-rows.js / .json üretir
+scripts/kontrol-listesi.md  Demo öncesi elle kontrol listesi
 tests/engine.test.js  Kural ve motor doğrulama testleri
 tests/derive.test.js  Tarih eşiği ve statü türetme testleri
+tests/wizard-steps.test.js  Sihirbazın her kombinasyonda hızlı girişle aynı sonucu verdiği
+tests/texts.test.js   Metinlerde yasak ifade olmadığı, sürüm damgasının Excel ile uyuştuğu
 ```
 
 ## Doğrulama
@@ -95,6 +100,11 @@ Testler şunları garanti eder:
   değeri için) aynen üretir; hiçbir girdi çelişen satırlara düşmez.
 - Kurum + tarih türetmesi tablodaki eşikleri (1.10.2008, 15.10.2008) aynen
   uygular ve yalnızca tabloda bulunan statü kodlarını üretir.
+- Adım adım mod, her kurum × yıl × ek soru kombinasyonunda (55 binden fazla)
+  hızlı girişle aynı sonucu verir; ortak sorular yalnızca gerektiğinde sorulur.
+- Arayüz metinlerinde hukuki yorum ya da yönlendirme ifadesi yoktur; sürüm
+  damgası kaynak Excel'in özetiyle uyuşur (Excel değişip `npm run extract`
+  çalıştırılmazsa test kırılır).
 
 ## Excel'i güncelleme
 

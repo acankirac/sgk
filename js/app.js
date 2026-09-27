@@ -7,26 +7,11 @@
   var RULES = window.SGK_RULES;
   var ENGINE = window.SGK_ENGINE;
   var EXCEL = window.SGK_EXCEL;
+  var TEXTS = window.SGK_TEXTS;
   var TABS = ['esAnneBaba', 'anneBaba', 'dulEs'];
-  var TITLES = { esAnneBaba: 'Eşten ve anne-babadan aylık', anneBaba: 'Anne ve babadan aylık', dulEs: 'İki eşten aylık' };
-
-  // Sonucun sade Türkçe açıklaması (adım adım modda ve yazdırma özetinde)
-  var PLAIN = {
-    esAnneBaba: {
-      iki: 'Hem eşinizden hem de annenizden ya da babanızdan aylık bağlanır.',
-      tek: 'Eşinizden ve annenizden ya da babanızdan aylıklar birlikte bağlanmaz; yalnızca tek aylık bağlanır.'
-    },
-    anneBaba: {
-      yuksekTamDusukYarim: 'Yüksek olan aylığın tamamı, düşük olan aylığın yarısı bağlanır.',
-      tercihTam: 'İki aylıktan tercih ettiğiniz biri tam olarak bağlanır.',
-      ikiTam: 'Annenizden ve babanızdan her iki aylık da tam olarak bağlanır.',
-      yuksekOlan: 'Yalnızca yüksek olan aylık bağlanır.'
-    },
-    dulEs: {
-      tercih: 'İki eşinizden birinin aylığını tercih edersiniz; yalnızca o aylık bağlanır.',
-      iki: 'Her iki eşinizden de aylık bağlanır.'
-    }
-  };
+  var TITLES = TEXTS.TITLES;
+  var PLAIN = TEXTS.PLAIN;
+  var SHORT = TEXTS.SHORT;
 
   var inArtifact = !!window.SGK_IN_ARTIFACT || !!window.claude || /claude/i.test(location.hostname) ||
     (window.top !== window && /claude/i.test(document.referrer || ''));
@@ -288,17 +273,15 @@
     return parts;
   }
 
-  // Sonucun kısa adı (çapraz tablo hücreleri için)
-  var SHORT = {
-    esAnneBaba: { iki: 'İki', tek: 'Tek' },
-    anneBaba: { yuksekTamDusukYarim: 'Yüksek tam, düşük yarım', tercihTam: 'Tercih edilen (tam)', ikiTam: 'İki tam', yuksekOlan: 'Yüksek olan' },
-    dulEs: { tercih: 'Tercih edilen', iki: 'İki' }
-  };
-
   // Eşleşen satır(lar)ı başlık–değer kartı olarak gösteren açılır blok
   function rowCard(key, rows) {
     var sheet = EXCEL[key];
+    var expert = document.body.getAttribute('data-mode') === 'expert';
     var det = el('details', { class: 'rowcard' }, [el('summary', { text: rows.length > 1 ? 'Tablodaki satırları göster' : 'Tablodaki satırı göster' })]);
+    if (expert) {
+      det.open = store('sgk-basis') !== 'kapali';
+      det.addEventListener('toggle', function () { store('sgk-basis', det.open ? 'acik' : 'kapali'); });
+    }
     rows.forEach(function (rule) {
       var r = excelRow(key, rule.row);
       if (!r) { return; }
@@ -352,7 +335,7 @@
         })));
       });
     }
-    box.appendChild(el('p', { class: 'note', text: 'Bu özet yalnızca kaynak tablodaki ilgili satıra dayanır. ' + metaText() + '.' }));
+    box.appendChild(el('p', { class: 'note', text: TEXTS.NONE.printNote + ' ' + metaText() + '.' }));
   }
 
   function summaryText() {
@@ -411,18 +394,21 @@
         if (/^tr/i.test(voices[i].lang)) { u.voice = voices[i]; break; }
       }
       var label = btn ? btn.textContent : '';
-      var reset = function () { speech.speaking = false; if (btn) { btn.textContent = label; } };
+      var reset = function () { speech.speaking = false; if (btn) { btn.textContent = label; btn.setAttribute('aria-pressed', 'false'); } };
+      speech.reset = reset;
       u.onend = reset;
       u.onerror = reset;
       speech.speaking = true;
-      if (btn) { btn.textContent = 'Durdur'; }
+      if (btn) { btn.textContent = 'Durdur'; btn.setAttribute('aria-pressed', 'true'); }
       try { window.speechSynthesis.cancel(); window.speechSynthesis.speak(u); } catch (e) { reset(); }
     },
     stop: function () {
       try { window.speechSynthesis.cancel(); } catch (e) { /* yok say */ }
+      if (speech.speaking && speech.reset) { speech.reset(); }
       speech.speaking = false;
     }
   };
+  document.addEventListener('visibilitychange', function () { if (document.hidden) { speech.stop(); } });
 
   /* ---------- Hızlı giriş formları ---------- */
 
@@ -496,8 +482,15 @@
     try { history.replaceState(null, '', hashFor(key)); } catch (e) { /* yok say */ }
   }
 
-  function copyLink(btn) {
-    var url = location.href.split('#')[0] + hashFor(currentTab);
+  // Verilen motor girdisi için paylaşılabilir bağlantı (yalnızca statü kodları)
+  function linkFor(key, input) {
+    var parts = [];
+    Object.keys(input || {}).forEach(function (k) { if (input[k]) { parts.push(k + '=' + encodeURIComponent(input[k])); } });
+    return location.href.split('#')[0] + '#' + key + (parts.length ? '?' + parts.join('&') : '');
+  }
+
+  function copyLink(url, btn) {
+    if (typeof url !== 'string') { btn = url; url = location.href.split('#')[0] + hashFor(currentTab); }
     var done = function () { var old = btn.textContent; btn.textContent = 'Bağlantı kopyalandı'; setTimeout(function () { btn.textContent = old; }, 1600); };
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(url).then(done, function () { fallbackCopy(url, done); });
@@ -538,7 +531,7 @@
       var copyBtn = el('button', { type: 'button', class: 'btn secondary', text: 'Kopyala' });
       copyBtn.addEventListener('click', function () { copySummary(copyBtn); });
       var linkBtn = el('button', { type: 'button', class: 'btn secondary', text: 'Bağlantıyı kopyala' });
-      linkBtn.addEventListener('click', function () { copyLink(linkBtn); });
+      linkBtn.addEventListener('click', function () { copyLink(location.href.split('#')[0] + hashFor(key), linkBtn); });
       box.appendChild(actionsRow([
         canPrint ? el('button', { type: 'button', class: 'btn secondary', text: 'Yazdır', onclick: function () { window.print(); } }) : null,
         copyBtn,
@@ -655,6 +648,8 @@
     highlightRows: highlightRows,
     rowLinks: rowLinks,
     rowCard: rowCard,
+    linkFor: linkFor,
+    copyLink: copyLink,
     setPrintSummary: setPrintSummary,
     copySummary: copySummary,
     print: function () { if (canPrint) { window.print(); } }

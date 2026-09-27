@@ -1,11 +1,12 @@
-// Adım adım mod: her ekranda tek soru, büyük seçenekler, sonunda tek cevap.
-// Statü, kurum + vefat yılı (2008 ise gün) bilgisinden js/derive.js ile türetilir.
+// Adım adım mod: görünüm. Soru sırası ve hesaplama js/wizard-steps.js içindedir.
 (function () {
   'use strict';
 
   var RULES = window.SGK_RULES;
   var ENGINE = window.SGK_ENGINE;
   var DERIVE = window.SGK_DERIVE;
+  var STEPS = window.SGK_WIZARD_STEPS;
+  var TEXTS = window.SGK_TEXTS;
   var UI = window.SGK_UI;
   var el = UI.el;
 
@@ -15,156 +16,8 @@
     { key: 'dulEs', title: 'İki eşimden aylık', desc: 'Vefat eden iki eşimden de aylık hakkım var.' }
   ];
 
-  // ad: sonuç listesindeki kısa ad; adIn: soru cümlesindeki özne; adGen: -in hali
-  function person(prefix, ad, adIn, adGen) {
-    return {
-      prefix: prefix,
-      ad: ad,
-      kurumQ: adIn + ' nerede çalışıyordu?',
-      yilQ: adIn + ' hangi yıl vefat etti?',
-      gunQ: adIn + ' 2008 yılında hangi gün vefat etti?',
-      memurQ: adIn + ' memurluğa ilk kez ne zaman başladı?',
-      devirQ: adGen + ' bağlı olduğu sandık SGK\'ya devredildi mi?'
-    };
-  }
-
-  var PERSONS = {
-    esAnneBaba: [
-      person('es', 'Eşiniz', 'Eşiniz', 'Eşinizin'),
-      person('ab', 'Anneniz / babanız', 'Vefat eden anneniz ya da babanız', 'Vefat eden annenizin ya da babanızın')
-    ],
-    anneBaba: [person('baba', 'Babanız', 'Babanız', 'Babanızın'), person('anne', 'Anneniz', 'Anneniz', 'Annenizin')],
-    dulEs: [person('ilk', 'İlk eşiniz', 'İlk eşiniz', 'İlk eşinizin'), person('ikinci', 'İkinci eşiniz', 'İkinci eşiniz', 'İkinci eşinizin')]
-  };
-
-  var BILMIYORUM = { code: 'bilmiyorum', label: 'Bilmiyorum', desc: 'İki olasılığın cevabını birlikte gösterelim.' };
-  var YESNO = [{ code: 'evet', label: 'Evet' }, { code: 'hayir', label: 'Hayır' }, BILMIYORUM];
-  var MEMUR = [{ code: 'once', label: '15 Ekim 2008\'den önce' }, { code: 'sonra', label: '15 Ekim 2008 veya sonrası' }];
-  var DEVIR = [{ code: 'evet', label: 'Evet, SGK\'ya devredildi' }, { code: 'hayir', label: 'Hayır, devredilmedi' }];
-  var DONEM = [{ code: 'once2017', label: '5 Aralık 2017\'den önce' }, { code: 'sonra2017', label: '5 Aralık 2017 veya sonrası' }, BILMIYORUM];
-
-  // "Bilmiyorum" seçilince gösterilen iki olasılık
-  var VARIANTS = {
-    once: [{ value: 'evet', label: 'Önceden aylık bağlanmışsa (Evet)' }, { value: 'hayir', label: 'Önceden aylık bağlanmamışsa (Hayır)' }],
-    donem: [{ value: 'once2017', label: 'Başvuru 5 Aralık 2017\'den önceyse' }, { value: 'sonra2017', label: 'Başvuru 5 Aralık 2017 veya sonrasıysa' }]
-  };
-
   var thisYear = new Date().getFullYear();
-
   var state = { modul: null, answers: {} };
-
-  /* ---------- Adım modeli ---------- */
-
-  function tarihOf(prefix, a) {
-    var yil = a[prefix + '.yil'];
-    if (!yil) { return null; }
-    if (yil === 2008) { return a[prefix + '.gun'] || null; }
-    return String(yil) + '-07-01';
-  }
-
-  function deriveInput(prefix, a) {
-    var devir = a[prefix + '.devir'];
-    return {
-      kurum: a[prefix + '.kurum'] || null,
-      tarih: tarihOf(prefix, a),
-      memur: a[prefix + '.memur'] || null,
-      devir: devir === 'evet' ? true : devir === 'hayir' ? false : null
-    };
-  }
-
-  // Bir kişi için soru listesi; cevaplanmamış ilk soruda durur.
-  function personSteps(modul, p, a) {
-    var steps = [];
-    var kurumOptions = DERIVE.kurumlar(modul).map(function (k) { return { code: k.code, label: k.label, desc: k.aciklama }; });
-    steps.push({ id: p.prefix + '.kurum', type: 'choice', q: p.kurumQ, options: kurumOptions });
-    var kurum = a[p.prefix + '.kurum'];
-    if (!kurum) { return steps; }
-
-    if (kurum === 'banka' && modul !== 'dulEs') {
-      steps.push({ id: p.prefix + '.devir', type: 'choice', q: p.devirQ, options: DEVIR });
-      if (!a[p.prefix + '.devir']) { return steps; }
-    }
-
-    var probe = DERIVE.derive(modul, { kurum: kurum, tarih: null, memur: null, devir: deriveInput(p.prefix, a).devir });
-    var needTarih = modul === 'anneBaba' || probe.needs === 'tarih';
-    if (needTarih) {
-      steps.push({ id: p.prefix + '.yil', type: 'year', q: p.yilQ });
-      var yil = a[p.prefix + '.yil'];
-      if (!yil) { return steps; }
-      if (yil === 2008) {
-        steps.push({ id: p.prefix + '.gun', type: 'date', q: p.gunQ });
-        if (!a[p.prefix + '.gun']) { return steps; }
-      }
-    }
-
-    var r = DERIVE.derive(modul, deriveInput(p.prefix, a));
-    if (r.needs === 'memur') {
-      steps.push({ id: p.prefix + '.memur', type: 'choice', q: p.memurQ, options: MEMUR });
-      if (!a[p.prefix + '.memur']) { return steps; }
-    }
-    return steps;
-  }
-
-  function personDone(modul, p, a) {
-    return personSteps(modul, p, a).every(function (st) { return a[st.id] != null; });
-  }
-
-  function known(v) { return v && v !== 'bilmiyorum' ? v : null; }
-
-  function engineInput(modul, a, once, donem) {
-    var ps = PERSONS[modul];
-    var c0 = DERIVE.derive(modul, deriveInput(ps[0].prefix, a)).code;
-    var c1 = DERIVE.derive(modul, deriveInput(ps[1].prefix, a)).code;
-    if (modul === 'esAnneBaba') { return { es: c0, ab: c1, once: once }; }
-    if (modul === 'anneBaba') {
-      return { baba: c0, anne: c1, tarih: DERIVE.tarihKategorisi(tarihOf('baba', a), tarihOf('anne', a)), donem: donem };
-    }
-    return { ilk: c0, ikinci: c1 };
-  }
-
-  function runEngine(modul, input) {
-    if (modul === 'esAnneBaba') { return ENGINE.evalEsAnneBaba(input); }
-    if (modul === 'anneBaba') { return ENGINE.evalAnneBaba(input); }
-    return ENGINE.evalDulEs(input);
-  }
-
-  // Sorulacak soruları belirlemek için (Bilmiyorum = cevapsız sayılır)
-  function baseEvaluate(modul, a) {
-    return runEngine(modul, engineInput(modul, a, known(a.once), known(a.donem)));
-  }
-
-  // Sonuç için: Bilmiyorum seçildiyse iki olasılık birlikte döner
-  function finalEvaluate(modul, a) {
-    var which = a.once === 'bilmiyorum' ? 'once' : a.donem === 'bilmiyorum' ? 'donem' : null;
-    if (!which) { return { dual: false, res: baseEvaluate(modul, a) }; }
-    return {
-      dual: true,
-      which: which,
-      variants: VARIANTS[which].map(function (v) {
-        var input = engineInput(modul, a, which === 'once' ? v.value : known(a.once), which === 'donem' ? v.value : known(a.donem));
-        return { label: v.label, res: runEngine(modul, input) };
-      })
-    };
-  }
-
-  function allSteps(modul, a) {
-    var steps = [];
-    var ps = PERSONS[modul];
-    for (var i = 0; i < ps.length; i++) {
-      steps = steps.concat(personSteps(modul, ps[i], a));
-      if (!personDone(modul, ps[i], a)) { return steps; }
-    }
-    var res = baseEvaluate(modul, a);
-    if (res.needsOnce) {
-      steps.push({ id: 'once', type: 'choice', q: 'Annenizden ya da babanızdan 1 Ekim 2008\'den önce aylık bağlanmış mıydı?', options: YESNO, help: 'Aylık sonradan kesilmiş olsa bile "Evet" seçin.' });
-    } else if (res.needsDonem) {
-      steps.push({ id: 'donem', type: 'choice', q: 'Aylık için başvuru ne zaman yapıldı?', options: DONEM });
-    }
-    return steps;
-  }
-
-  /* ---------- Görünüm ---------- */
-
   var root = document.getElementById('wizard');
 
   function focusQuestion() {
@@ -174,12 +27,12 @@
   }
 
   function render() {
+    UI.speech.stop();
     root.innerHTML = '';
     if (!state.modul) { renderStart(); UI.showSource(null); focusQuestion(); return; }
     var a = state.answers;
-    var steps = allSteps(state.modul, a);
-    var idx = -1;
-    for (var i = 0; i < steps.length; i++) { if (a[steps[i].id] == null) { idx = i; break; } }
+    var steps = STEPS.allSteps(state.modul, a);
+    var idx = STEPS.currentIndex(steps, a);
     if (idx === -1) { renderResult(steps); }
     else { renderStep(steps, idx); UI.showSource(null); }
     focusQuestion();
@@ -260,12 +113,11 @@
     render();
   }
 
-  // Bir kişinin cevaplarını (ve sonraki ortak soruları) silip o kişinin ilk sorusuna döner
+  // Bir kişinin cevaplarını (ve ortak soruları) silip o kişinin ilk sorusuna döner
   function changePerson(prefix) {
     var a = state.answers;
     Object.keys(a).forEach(function (k) { if (k.indexOf(prefix + '.') === 0) { delete a[k]; } });
     delete a.once; delete a.donem;
-    UI.speech.stop();
     render();
   }
 
@@ -276,7 +128,7 @@
 
   function personFact(modul, p, a) {
     var kurum = DERIVE.KURUMLAR.filter(function (k) { return k.code === a[p.prefix + '.kurum']; })[0];
-    var code = DERIVE.derive(modul, deriveInput(p.prefix, a)).code;
+    var code = DERIVE.derive(modul, STEPS.deriveInput(p.prefix, a)).code;
     var st = ENGINE.findStatus(RULES[modul].status, code);
     var parts = [kurum ? kurum.label : ''];
     if (a[p.prefix + '.devir']) { parts.push(a[p.prefix + '.devir'] === 'evet' ? 'SGK\'ya devredilmiş' : 'devredilmemiş'); }
@@ -286,43 +138,46 @@
   }
 
   function answerOf(res) {
-    if (res.status === 'ok') { return { text: res.sonuc.title, tone: 'tone-' + res.sonuc.tone, plain: (UI.PLAIN[state.modul] || {})[res.sonuc.key] || '' }; }
+    if (res.status === 'ok') { return { text: res.sonuc.title, tone: 'tone-' + res.sonuc.tone, plain: (TEXTS.PLAIN[state.modul] || {})[res.sonuc.key] || '' }; }
     if (res.status === 'conflict') { return { text: res.sonuclar.map(function (s) { return s.title; }).join(' / '), tone: 'tone-warn', plain: 'Kaynak tabloda bu durum için farklı sonuç veren satırlar var.' }; }
-    return { text: 'Kaynak tabloda bu durum için satır yok.', tone: 'tone-none', plain: res.reason || 'Bu durum için tablo bir sonuç vermiyor. Lütfen aylık bağlayan kuruma başvurun.' };
+    return { text: TEXTS.NONE.title, tone: 'tone-none', plain: res.reason || '' };
   }
 
   function renderResult(steps) {
     var modul = state.modul;
     var a = state.answers;
-    var out = finalEvaluate(modul, a);
+    var out = STEPS.finalEvaluate(modul, a);
 
-    var facts = PERSONS[modul].map(function (p) { return personFact(modul, p, a); });
+    var facts = STEPS.PERSONS[modul].map(function (p) { return personFact(modul, p, a); });
     if (a.once) {
       facts.push({ label: '1 Ekim 2008 öncesi aylık', value: a.once === 'evet' ? 'Evet' : a.once === 'hayir' ? 'Hayır' : 'Bilmiyorum', code: '', change: function () { delete a.once; render(); } });
     }
     if (a.donem) {
-      facts.push({ label: 'Başvuru', value: a.donem === 'once2017' ? '5 Aralık 2017\'den önce' : a.donem === 'sonra2017' ? '5 Aralık 2017 veya sonrası' : 'Bilmiyorum', code: '', change: function () { delete a.donem; render(); } });
+      facts.push({ label: 'Dönem', value: a.donem === 'once2017' ? '5.12.2017 tarihi öncesi' : a.donem === 'sonra2017' ? '5.12.2017 tarihinden itibaren' : 'Bilmiyorum', code: '', change: function () { delete a.donem; render(); } });
     }
 
     root.appendChild(el('h1', { class: 'question', text: 'Sonuç' }));
+    var live = el('div', { role: 'status' });
+    root.appendChild(live);
 
     var rows = [], speakText = '', printAnswer = '', printPlain = '';
     if (!out.dual) {
       var ans = answerOf(out.res);
       rows = out.res.rows || [];
-      root.appendChild(el('p', { class: 'answer-big ' + ans.tone, text: ans.text }));
-      if (ans.plain) { root.appendChild(el('p', { class: 'plain', text: ans.plain })); }
+      live.appendChild(el('p', { class: 'answer-big ' + ans.tone, text: ans.text }));
+      if (ans.plain) { live.appendChild(el('p', { class: 'plain', text: ans.plain })); }
       speakText = ans.text + ' ' + ans.plain;
       printAnswer = ans.text; printPlain = ans.plain;
       if (rows.length) {
         root.appendChild(el('p', { class: 'src' }, ['Kaynak tablo, '].concat(UI.rowLinks(modul, rows))));
         root.appendChild(UI.rowCard(modul, rows));
+        speakText += ' Kaynak tablo, satır ' + rows.map(function (r) { return r.row; }).join(' ve ') + '.';
       } else if (out.res.candidates && out.res.candidates.length) {
         root.appendChild(el('p', { class: 'src' }, ['Koşulları farklı yakın satır: '].concat(UI.rowLinks(modul, out.res.candidates))));
       }
     } else {
-      root.appendChild(el('p', { class: 'answer-big tone-none', text: 'Cevap, bilmediğiniz bilgiye göre değişiyor.' }));
-      root.appendChild(el('p', { class: 'plain', text: 'İki olasılığın cevabı aşağıda. Bu bilgiyi SGK kayıtlarından öğrenebilirsiniz.' }));
+      live.appendChild(el('p', { class: 'answer-big tone-none', text: TEXTS.NONE.dual }));
+      live.appendChild(el('p', { class: 'plain', text: TEXTS.NONE.dualHelp }));
       var list = el('div', { class: 'variants' });
       var parts = [];
       out.variants.forEach(function (v) {
@@ -336,9 +191,9 @@
         ]));
         parts.push(v.label + ': ' + vans.text + (vrows.length ? ' (satır ' + vrows.map(function (r) { return r.row; }).join(', ') + ')' : ''));
       });
-      root.appendChild(list);
-      speakText = 'Cevap, bilmediğiniz bilgiye göre değişiyor. ' + parts.join('. ');
-      printAnswer = 'Cevap, bilinmeyen bilgiye göre değişiyor.'; printPlain = parts.join(' · ');
+      live.appendChild(list);
+      speakText = TEXTS.NONE.dual + ' ' + parts.join('. ');
+      printAnswer = TEXTS.NONE.dual; printPlain = parts.join(' · ');
       if (rows.length) { root.appendChild(UI.rowCard(modul, rows)); }
     }
 
@@ -350,17 +205,21 @@
       ]);
     })));
 
+    var linkBtn = el('button', { type: 'button', class: 'link', text: 'Bağlantıyı kopyala' });
+    linkBtn.addEventListener('click', function () { UI.copyLink(UI.linkFor(modul, out.input), linkBtn); });
+    root.appendChild(el('p', { class: 'src' }, [linkBtn]));
+
     var actions = el('div', { class: 'actions' });
     if (UI.speech.supported) {
-      var speakBtn = el('button', { type: 'button', class: 'btn secondary', text: 'Sesli oku' });
+      var speakBtn = el('button', { type: 'button', class: 'btn secondary', text: 'Sesli oku', 'aria-pressed': 'false' });
       speakBtn.addEventListener('click', function () { UI.speech.speak(speakText, speakBtn); });
       actions.appendChild(speakBtn);
     }
     if (UI.canPrint) { actions.appendChild(el('button', { type: 'button', class: 'btn secondary', text: 'Yazdır', onclick: UI.print })); }
-    actions.appendChild(el('button', { type: 'button', class: 'btn', text: 'Baştan başla', onclick: function () { UI.speech.stop(); state.modul = null; state.answers = {}; render(); } }));
+    actions.appendChild(el('button', { type: 'button', class: 'btn', text: 'Baştan başla', onclick: function () { state.modul = null; state.answers = {}; render(); } }));
     root.appendChild(actions);
     root.appendChild(el('div', { class: 'nav' }, [
-      el('button', { type: 'button', class: 'btn quiet', text: '← Geri', onclick: function () { UI.speech.stop(); goBack(steps, steps.length); } })
+      el('button', { type: 'button', class: 'btn quiet', text: '← Geri', onclick: function () { goBack(steps, steps.length); } })
     ]));
 
     UI.setPrintSummary({
