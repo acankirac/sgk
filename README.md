@@ -61,6 +61,15 @@ npm start            # http://localhost:8080  (python3 -m http.server)
 ```
 
 GitHub Pages için: Settings → Pages → "Deploy from a branch", kök dizin.
+
+Kendi sunucunuza (Ubuntu/Debian, nginx) yayınlamak için kendi bilgisayarınızdan:
+
+```bash
+bash deploy/deploy.sh root@SUNUCU_IP
+```
+
+Betik nginx'i kurar, dosyaları `/var/www/cift-aylik` altına kopyalar ve
+`deploy/nginx.conf` yapılandırmasını etkinleştirir.
 Çevrimdışı çalışma ve ana ekrana ekleme için HTTPS (veya localhost) gerekir.
 
 ## Dosya yapısı
