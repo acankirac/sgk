@@ -65,11 +65,12 @@ GitHub Pages için: Settings → Pages → "Deploy from a branch", kök dizin.
 Kendi sunucunuza (Ubuntu/Debian, nginx) yayınlamak için kendi bilgisayarınızdan:
 
 ```bash
-bash deploy/deploy.sh root@SUNUCU_IP
+bash deploy/deploy.sh root@SUNUCU_IP        # DOMAIN=alan.adi ile alan adı değiştirilebilir
 ```
 
 Betik nginx'i kurar, dosyaları `/var/www/cift-aylik` altına kopyalar ve
-`deploy/nginx.conf` yapılandırmasını etkinleştirir.
+`deploy/nginx.conf` yapılandırmasını etkinleştirir, ardından Let's Encrypt ile
+HTTPS sertifikası alır (varsayılan alan adı sgk.krccorp.net).
 Çevrimdışı çalışma ve ana ekrana ekleme için HTTPS (veya localhost) gerekir.
 
 ## Dosya yapısı
