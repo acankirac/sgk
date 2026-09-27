@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Çift Aylık Sorgusu – Mimari ve Sık Sorulan Sorular</title>
+<link rel="stylesheet" href="../css/fonts.css">
+<style>
+  @page { size: A4; margin: 18mm 18mm 20mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "IBM Plex Sans", system-ui, sans-serif; color: #1a2433; font-size: 10.5pt; line-height: 1.5; }
+  .cover { display: flex; align-items: center; gap: 12pt; padding-bottom: 10pt; border-bottom: 2pt solid #1e3a5f; }
+  .cover svg { width: 36pt; height: 36pt; }
+  .cover .name { font-size: 16pt; color: #1e3a5f; } .cover .name b { font-weight: 600; }
+  .cover .sub { font-size: 9pt; color: #5b6675; }
+  .cover .meta { margin-left: auto; text-align: right; font-size: 9pt; color: #5b6675; }
+  h1 { font-size: 20pt; font-weight: 600; margin: 18pt 0 4pt; letter-spacing: -0.01em; }
+  .lead { color: #3a4452; margin: 0 0 10pt; }
+  h2 { font-size: 10pt; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #1e3a5f; margin: 18pt 0 6pt; padding-bottom: 3pt; border-bottom: 1pt solid #d6dce4; break-after: avoid; }
+  .qa { margin: 0 0 9pt; break-inside: avoid; }
+  .q { font-weight: 600; margin: 0 0 2pt; }
+  .q span { color: #1f5aa8; margin-right: 4pt; font-variant-numeric: tabular-nums; }
+  .a { margin: 0; color: #1f2937; }
+  .a + .a { margin-top: 3pt; }
+  ul { margin: 3pt 0 0; padding-left: 14pt; } li { margin: 1pt 0; }
+  code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 9pt; background: #f1f3f6; padding: 0 3pt; border-radius: 2pt; }
+  table { border-collapse: collapse; width: 100%; font-size: 9.5pt; margin: 4pt 0 0; break-inside: avoid; }
+  th, td { text-align: left; vertical-align: top; padding: 4pt 6pt; border-top: 1pt solid #e3e8ee; }
+  thead th { background: #f1f3f6; border-top: 0; font-weight: 600; }
+  td:first-child { white-space: nowrap; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 8.8pt; }
+  .diagram { margin: 6pt 0 0; padding: 8pt 10pt; border: 1pt solid #d6dce4; border-radius: 5pt; background: #f7f9fb; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 8.8pt; line-height: 1.55; white-space: pre; break-inside: avoid; }
+  .note { font-size: 9pt; color: #5b6675; }
+</style>
+</head>
+<body>
+<header class="cover">
+  <svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#1e3a5f"/><rect x="17" y="14" width="34" height="22" rx="5" fill="#d4a94a"/><rect x="13" y="26" width="34" height="22" rx="5" fill="#fff"/><rect x="19" y="33" width="14" height="3" rx="1.5" fill="#1e3a5f"/><rect x="19" y="39" width="22" height="3" rx="1.5" fill="#1e3a5f" opacity=".45"/></svg>
+  <div><div class="name"><b>Çift Aylık</b> Sorgusu</div><div class="sub">Ölüm aylığı hak sahipliği</div></div>
+  <div class="meta">Teknik doküman<br>Eylül 2026</div>
+</header>
+
+<h1>Mimari ve Sık Sorulan Sorular</h1>
+<p class="lead">Bu doküman, uygulamanın nasıl kurulduğunu ve teknik değerlendirmede gelebilecek soruların cevaplarını özetler. Cevaplar, uygulamanın bugünkü kaynak koduna dayanır.</p>
+
+<h2>1. Genel mimari</h2>
+<div class="qa"><p class="q"><span>1.1</span>Uygulama nasıl bir mimariye sahip?</p>
+<p class="a">Tamamen tarayıcıda çalışan statik bir web uygulamasıdır. Sunucu tarafında çalışan kod, veritabanı veya API yoktur. Sunucu (nginx) yalnızca HTML, CSS, JavaScript ve yazı tipi dosyalarını gönderir; tüm hesaplama kullanıcının tarayıcısında yapılır.</p>
+<div class="diagram">Kaynak Excel (.xls)
+   │  scripts/extract_excel.py  (Python, xlrd)
+   ▼
+js/excel-rows.js  ─ ham hücre metinleri + sürüm damgası
+js/rules.js       ─ her Excel satırının kodlanmış kuralı (satır numarasıyla)
+   │
+   ▼
+js/engine.js      ─ eşleştirme motoru  ◄── js/derive.js (kurum + tarih → statü)
+   │                                    ◄── js/wizard-steps.js (soru sırası)
+   ▼
+js/app.js · js/wizard.js  ─ arayüz (adım adım / hızlı giriş, yazdırma)
+   │
+   ▼
+nginx (statik dosya) ── HTTPS ── Tarayıcı  (service worker ile çevrimdışı)</div></div>
+
+<div class="qa"><p class="q"><span>1.2</span>Neden sunucu tarafı (backend) yok?</p>
+<p class="a">Kurallar sabit bir tablodan gelir ve kullanıcıdan kişisel veri alınmaz. Bu yüzden sunucuda işlenecek ya da saklanacak bir şey yoktur. Backend olmaması güvenlik yüzeyini küçültür, bakımı kolaylaştırır ve uygulamanın intranette ya da tek bir klasörden çalışabilmesini sağlar.</p></div>
+
+<div class="qa"><p class="q"><span>1.3</span>Hangi teknolojiler kullanıldı?</p>
+<p class="a">HTML, CSS ve çerçevesiz (vanilla) JavaScript. Derleme adımı, paket yöneticisi bağımlılığı veya üçüncü taraf JavaScript kütüphanesi yoktur. Excel dönüşümü için Python (<code>xlrd</code>), testler için Node.js'in yerleşik test aracı kullanılır. Yazı tipi IBM Plex Sans'tır ve sunucuda yerel olarak bulunur.</p></div>
+
+<div class="qa"><p class="q"><span>1.4</span>Kod hangi modüllerden oluşuyor?</p>
+<table><thead><tr><th>Dosya</th><th>Görevi</th></tr></thead><tbody>
+<tr><td>js/excel-rows.js</td><td>Excel'in üç sayfasındaki satırların ham metni ve sürüm damgası. Betikle üretilir, elle düzenlenmez.</td></tr>
+<tr><td>js/rules.js</td><td>Her Excel satırının eşleştirme kuralı. Kural, satır numarasıyla Excel'e bağlıdır.</td></tr>
+<tr><td>js/engine.js</td><td>Seçimleri kurallarla eşleştirir, sonucu ve dayanak satırı döndürür. Arayüzden bağımsızdır.</td></tr>
+<tr><td>js/derive.js</td><td>Kurum ve vefat tarihinden tablodaki statü kodunu türetir (tarih eşikleri burada).</td></tr>
+<tr><td>js/wizard-steps.js</td><td>Adım adım modun soru sırası ve hesaplama mantığı. Arayüzden bağımsızdır.</td></tr>
+<tr><td>js/texts.js</td><td>Arayüz metinleri (sonuçların sade karşılığı, kısa adlar).</td></tr>
+<tr><td>js/app.js, js/wizard.js</td><td>Arayüz: iki mod, kaynak tablo, çapraz tablo, yazdırma, sesli okuma.</td></tr>
+<tr><td>js/config.js</td><td>Kurulum ayarları (izin alındığında kurum logosu).</td></tr>
+<tr><td>sw.js, manifest</td><td>Çevrimdışı çalışma ve telefona uygulama olarak ekleme.</td></tr>
+</tbody></table></div>
+
+<div class="qa"><p class="q"><span>1.5</span>Uygulamanın boyutu ne kadar?</p>
+<p class="a">Yazı tipleri ve simgeler dahil tüm dosyalar yaklaşık 260 KB'tır. İlk açılıştan sonra dosyalar tarayıcı önbelleğinden gelir.</p></div>
+
+<h2>2. Veri ve kurallar</h2>
+<div class="qa"><p class="q"><span>2.1</span>Excel tablosu uygulamaya nasıl aktarılıyor?</p>
+<p class="a"><code>scripts/extract_excel.py</code> betiği Excel'in üç sayfasını okur, hücre metinlerini düzenler ve <code>js/excel-rows.js</code> ile <code>data/excel-rows.json</code> dosyalarını üretir. Aynı anda dosyanın SHA-256 özetinden bir sürüm damgası çıkarılır.</p></div>
+
+<div class="qa"><p class="q"><span>2.2</span>Sonuç nasıl hesaplanıyor?</p>
+<p class="a">Motor, kullanıcının seçtiği statüleri tablodaki kurallarla karşılaştırır. Eşleşen satır tek bir sonuç veriyorsa sonuç ve satır numarası gösterilir. Sonucun Evet/Hayır sorusuna ya da 5.12.2017 dönemine göre değiştiği durumlarda motor önce bu soruyu sordurur.</p></div>
+
+<div class="qa"><p class="q"><span>2.3</span>Tabloda olmayan bir durum seçilirse ne oluyor?</p>
+<p class="a">Uygulama yorum yapmaz ve "Kaynak tabloda bu durum için satır yok" der. Gerekiyorsa koşulları farklı yakın satırları bağlantı olarak gösterir, ama bunları sonuç gibi sunmaz.</p></div>
+
+<div class="qa"><p class="q"><span>2.4</span>Adım adım modda statü nasıl belirleniyor?</p>
+<p class="a">Kullanıcı kurumu (SSK, Bağ-Kur, Emekli Sandığı, Tarım SSK, Tarım Bağ-Kur, Banka Sandığı) ve vefat yılını söyler. Statü, tablodaki eşiklerle türetilir:</p>
+<ul><li>1.10.2008 öncesi vefat: eski kanun (506, 1479, 2926). Sonrası: 5510 karşılığı (4/a, 4/b, 4/b Tarım).</li>
+<li>Emekli Sandığı: 15.10.2008 ve sonrası vefatta memuriyete başlangıç sorulur (5434 ya da 4/c).</li>
+<li>Yıl 2008 ise gün sorulur; Tarım SSK ve devredilmemiş Banka Sandığı için tarih sorulmaz.</li></ul></div>
+
+<div class="qa"><p class="q"><span>2.5</span>Excel güncellenirse ne yapılıyor?</p>
+<p class="a">Yeni Excel <code>data/</code> klasörüne konur, <code>npm run extract</code> çalıştırılır, değişen satırlar için <code>js/rules.js</code> güncellenir ve <code>npm test</code> çalıştırılır. Testler eksik ya da tutarsız kuralı satır numarasıyla bildirir. Sürüm damgası değiştiği için kullanıcıların tarayıcısındaki eski önbellek de otomatik yenilenir.</p></div>
+
+<h2>3. Doğruluk ve test</h2>
+<div class="qa"><p class="q"><span>3.1</span>Sonuçların Excel ile aynı olduğu nasıl garanti ediliyor?</p>
+<p class="a">31 otomatik test vardır (<code>npm test</code>). Testler:</p>
+<ul><li>Her kuralı, Excel hücre metninden bağımsız olarak türetilen kodlarla karşılaştırır.</li>
+<li>Her Excel satırının kapsadığı her durum için motorun aynı sonucu verdiğini doğrular.</li>
+<li>Hiçbir girdi kombinasyonunun birbiriyle çelişen satırlara düşmediğini kontrol eder.</li>
+<li>Adım adım modu 55.872 kombinasyonda çalıştırıp hızlı girişle aynı sonucu verdiğini doğrular.</li>
+<li>Tarih eşiklerini sınır günlerde (30.9.2008, 1.10.2008, 14.10.2008, 15.10.2008) test eder.</li>
+<li>Metinlerde hukuki yorum ya da yönlendirme ifadesi olmadığını, sürüm damgasının Excel ile uyuştuğunu denetler.</li></ul></div>
+
+<div class="qa"><p class="q"><span>3.2</span>Tarayıcıda elle yapılması gereken kontroller var mı?</p>
+<p class="a">Evet. Ekran okuyucu, yüksek kontrast, çevrimdışı çalışma ve yazdırma gibi otomatikleştirilemeyen kontroller <code>scripts/kontrol-listesi.md</code> dosyasında listelenmiştir.</p></div>
+
+<h2>4. Güvenlik ve kişisel veriler (KVKK)</h2>
+<div class="qa"><p class="q"><span>4.1</span>Uygulama kişisel veri topluyor mu?</p>
+<p class="a">Hayır. Ad, T.C. kimlik numarası veya doğum tarihi istenmez. Girilen bilgiler (kurum, vefat yılı, Evet/Hayır) sunucuya gönderilmez ve saklanmaz. Tarayıcıda yalnızca yazı boyutu, seçilen mod ve satır kartının açık/kapalı tercihi tutulur.</p></div>
+
+<div class="qa"><p class="q"><span>4.2</span>"Bağlantıyı kopyala" ile paylaşılan adreste ne var?</p>
+<p class="a">Yalnızca tablodaki statü kodları ve Evet/Hayır, dönem gibi seçimler (örneğin <code>#esAnneBaba?es=A&amp;ab=BK&amp;once=evet</code>). Vefat tarihi veya kişisel bilgi adrese yazılmaz.</p></div>
+
+<div class="qa"><p class="q"><span>4.3</span>Dış servislere bağlantı var mı?</p>
+<p class="a">Hayır. Yazı tipleri dahil tüm dosyalar aynı sunucudan gelir. Analitik, çerez, reklam veya üçüncü taraf betik yoktur.</p></div>
+
+<div class="qa"><p class="q"><span>4.4</span>Saldırı yüzeyi nedir?</p>
+<p class="a">Sunucuda yalnızca statik dosya sunan nginx çalışır; form gönderimi, oturum, veritabanı ve kullanıcı girişi olmadığı için enjeksiyon türü saldırılara açık bir uç yoktur. Trafik Let's Encrypt sertifikasıyla HTTPS üzerinden şifrelenir. Canlı ortam için SSH'ın parola yerine anahtarla açılması ve nginx'e güvenlik başlıklarının (CSP, HSTS) eklenmesi önerilir.</p></div>
+
+<h2>5. Yayın ve altyapı</h2>
+<div class="qa"><p class="q"><span>5.1</span>Uygulama nerede ve nasıl yayınlanıyor?</p>
+<p class="a">Ubuntu sunucuda nginx ile, <code>sgk.krccorp.net</code> alan adında HTTPS üzerinden yayınlanır. <code>deploy/server-setup.sh</code> betiği nginx, git ve certbot'u kurar, kodu GitHub'dan çeker, sertifikayı alır ve HTTP'yi HTTPS'e yönlendirir.</p></div>
+
+<div class="qa"><p class="q"><span>5.2</span>Güncellemeler nasıl yayına alınıyor?</p>
+<p class="a">Sunucudaki zamanlanmış görev her 5 dakikada bir GitHub'daki yayın dalını çeker ve dosyaları günceller; elle güncellemek için sunucuda <code>sgk-update</code> komutu yeterlidir. Canlı kullanıma geçişte, yalnızca onaylanmış sürümlerin yayına çıkması için bu görevin belirli bir sürüm etiketine bağlanması önerilir.</p></div>
+
+<div class="qa"><p class="q"><span>5.3</span>Kurum intranetinde veya internetsiz çalışabilir mi?</p>
+<p class="a">Evet. Dosyalar herhangi bir iç web sunucusuna kopyalanabilir; dış bağlantı gerektirmez. HTTPS ile bir kez açıldıktan sonra uygulama internet bağlantısı olmadan da çalışır ve telefon ana ekranına uygulama gibi eklenebilir.</p></div>
+
+<div class="qa"><p class="q"><span>5.4</span>Çok sayıda kullanıcıyı kaldırır mı?</p>
+<p class="a">Evet. Sunucu yalnızca küçük statik dosyalar gönderdiği ve hesaplama tarayıcıda yapıldığı için tek bir nginx sunucusu çok yüksek eşzamanlı trafiği karşılar. Gerekirse dosyalar bir CDN arkasına alınabilir; kodda değişiklik gerekmez.</p></div>
+
+<div class="qa"><p class="q"><span>5.5</span>Hangi tarayıcılar destekleniyor?</p>
+<p class="a">Güncel Chrome, Edge, Firefox ve Safari; Android ve iOS tarayıcıları. JavaScript eski tarayıcılarla uyumlu yazılmıştır. Sesli okuma, tarayıcının Türkçe ses desteğine bağlıdır.</p></div>
+
+<h2>6. Erişilebilirlik ve kullanım</h2>
+<div class="qa"><p class="q"><span>6.1</span>Yaşlı kullanıcılar için neler yapıldı?</p>
+<ul class="a"><li>Her ekranda tek soru, büyük seçenek kartları, teknik terim yerine "Eşiniz nerede çalışıyordu?" gibi gündelik sorular.</li>
+<li>Üç kademeli yazı boyutu (A− / A+), en az 44 piksel dokunma alanları, yüksek kontrast desteği.</li>
+<li>Sonucu Türkçe sesle okuma; "Bilmiyorum" seçildiğinde iki olasılığın birlikte gösterilmesi.</li>
+<li>Klavye ile tam kullanım ve ekran okuyucu duyuruları.</li></ul></div>
+
+<div class="qa"><p class="q"><span>6.2</span>WCAG uyumlu mu?</p>
+<p class="a">Uygulama WCAG 2.1 AA ölçütleri gözetilerek tasarlanmıştır. Resmi bir erişilebilirlik denetiminden henüz geçmemiştir; elle kontrol listesi bu denetime hazırlık için hazırlanmıştır.</p></div>
+
+<div class="qa"><p class="q"><span>6.3</span>Personel için ne var?</p>
+<p class="a">Hızlı giriş modu (statü doğrudan seçilir, sonuç anında güncellenir), dayanak satırın hücreleriyle gösterimi, A4 sonuç özeti, işlem notu olarak kopyalama, paylaşılabilir bağlantı, kaynak tabloda arama ve statü × statü çapraz tablo görünümü.</p></div>
+
+<h2>7. Bakım ve geliştirme</h2>
+<div class="qa"><p class="q"><span>7.1</span>Yeni bir tablo veya modül eklemek ne kadar zor?</p>
+<p class="a">Yeni tablo, <code>extract_excel.py</code>'ye sayfa adı, <code>rules.js</code>'e kurallar ve motora bir değerlendirme fonksiyonu eklenerek bağlanır. Mevcut test yapısı yeni tabloya aynen uygulanır.</p></div>
+
+<div class="qa"><p class="q"><span>7.2</span>Kurum logosu eklenebilir mi?</p>
+<p class="a">Evet, kurumun yazılı izniyle. Logo dosyası <code>assets/</code> klasörüne konur ve <code>js/config.js</code> içinde tanımlanır; logo üst bantta ve A4 çıktıda görünür.</p></div>
+
+<div class="qa"><p class="q"><span>7.3</span>İleride neler eklenebilir?</p>
+<p class="a">Çok sayıda dosyayı Excel'den yapıştırıp toplu sonuç almak (toplu sorgu), kurum içi kimlik doğrulama, kullanım istatistikleri (kişisel veri içermeden) ve kurumun diğer aylık tablolarının eklenmesi.</p></div>
+
+<div class="qa"><p class="q"><span>7.4</span>Lisans ve bağımlılıklar nelerdir?</p>
+<p class="a">Uygulama kodu üçüncü taraf kütüphane içermez. Tek dış bileşen IBM Plex Sans yazı tipidir (SIL Open Font License 1.1, ticari kullanıma açık).</p></div>
+
+<p class="note">Kaynak kod: github.com/acankirac/sgk · Yayın: https://sgk.krccorp.net</p>
+</body>
+</html>
