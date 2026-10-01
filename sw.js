@@ -1,11 +1,11 @@
 // Çevrimdışı çalışma: uygulama dosyaları önbelleğe alınır, ağ varsa arka planda tazelenir.
 // Önbellek adı kaynak tablonun sürüm damgasından türetilir; tablo değişince eski önbellek silinir.
 importScripts('./js/excel-rows.js');
-var CACHE = 'cift-aylik-' + ((self.SGK_EXCEL && self.SGK_EXCEL.meta && self.SGK_EXCEL.meta.sha256) || 'v1');
+var CACHE = 'cift-aylik-3-' + ((self.SGK_EXCEL && self.SGK_EXCEL.meta && self.SGK_EXCEL.meta.sha256) || 'v1');
 var ASSETS = [
   './', './index.html', './css/app.css', './css/fonts.css',
   './assets/fonts/ibm-plex-sans-latin.woff2', './assets/fonts/ibm-plex-sans-latin-ext.woff2',
-  './js/config.js', './js/excel-rows.js', './js/rules.js', './js/engine.js', './js/derive.js', './js/texts.js', './js/wizard-steps.js', './js/app.js', './js/wizard.js',
+  './js/config.js', './js/excel-rows.js', './js/rules.js', './js/engine.js', './js/derive.js', './js/genelge.js', './js/hukum.js', './js/texts.js', './js/flows.js', './js/app.js', './js/wizard.js',
   './manifest.webmanifest', './assets/icon.svg', './assets/icon-192.png', './assets/icon-512.png'
 ];
 

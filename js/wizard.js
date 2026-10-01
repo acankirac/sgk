@@ -1,23 +1,14 @@
-// Adım adım mod: görünüm. Soru sırası ve hesaplama js/wizard-steps.js içindedir.
+// Adım adım mod: görünüm. Soru sırası ve hesaplama js/flows.js içindedir.
 (function () {
   'use strict';
 
+  var FLOWS = window.SGK_FLOWS;
   var RULES = window.SGK_RULES;
-  var ENGINE = window.SGK_ENGINE;
   var DERIVE = window.SGK_DERIVE;
-  var STEPS = window.SGK_WIZARD_STEPS;
-  var TEXTS = window.SGK_TEXTS;
   var UI = window.SGK_UI;
   var el = UI.el;
 
-  var MODULES = [
-    { key: 'esAnneBaba', title: 'Eşimden ve annemden ya da babamdan aylık', desc: 'Vefat eden eşimden ve vefat eden annemden ya da babamdan aylık hakkım var.' },
-    { key: 'anneBaba', title: 'Annemden ve babamdan aylık', desc: 'Vefat eden annemden ve babamdan aylık hakkım var.' },
-    { key: 'dulEs', title: 'İki eşimden aylık', desc: 'Vefat eden iki eşimden de aylık hakkım var.' }
-  ];
-
-  var thisYear = new Date().getFullYear();
-  var state = { modul: null, answers: {} };
+  var state = { flow: null, answers: {} };
   var root = document.getElementById('wizard');
 
   function focusQuestion() {
@@ -26,35 +17,48 @@
     try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch (e) { /* yok say */ }
   }
 
+  function start(id) { state.flow = id ? FLOWS.byId(id) : null; state.answers = {}; render(); }
+
   function render() {
     UI.speech.stop();
     root.innerHTML = '';
-    if (!state.modul) { renderStart(); UI.showSource(null); focusQuestion(); return; }
-    var a = state.answers;
-    var steps = STEPS.allSteps(state.modul, a);
-    var idx = STEPS.currentIndex(steps, a);
+    if (!state.flow) { renderStart(); UI.showSources(null); focusQuestion(); return; }
+    var steps = state.flow.steps(state.answers);
+    var idx = FLOWS.currentIndex(steps, state.answers);
     if (idx === -1) { renderResult(steps); }
-    else { renderStep(steps, idx); UI.showSource(null); }
+    else { renderStep(steps, idx); UI.showSources(null); }
     focusQuestion();
   }
 
+  /* ---------- Başlangıç ---------- */
+
   function renderStart() {
-    root.appendChild(el('h1', { class: 'question', text: 'Hangi durumu sormak istiyorsunuz?' }));
+    root.appendChild(el('h1', { class: 'question', text: 'Hangi konuda bilgi almak istiyorsunuz?' }));
     root.appendChild(el('p', { class: 'help', text: 'Size uyan seçeneğe dokunun. Birkaç kısa sorudan sonra cevabı göreceksiniz.' }));
-    var list = el('div', { class: 'choices-big' });
-    MODULES.forEach(function (m) {
-      list.appendChild(el('button', { type: 'button', class: 'choice-big', onclick: function () { state.modul = m.key; state.answers = {}; render(); } }, [
-        el('strong', { text: m.title }),
-        el('span', { text: m.desc })
-      ]));
+    FLOWS.GROUPS.forEach(function (g) {
+      var list = el('div', { class: 'choices-big' });
+      FLOWS.FLOWS.filter(function (f) { return f.group === g.id; }).forEach(function (f) {
+        list.appendChild(el('button', { type: 'button', class: 'choice-big', onclick: function () { start(f.id); } }, [
+          el('strong', { text: f.title }),
+          el('span', { text: f.desc })
+        ]));
+      });
+      root.appendChild(el('section', { class: 'group' }, [el('h2', { class: 'group-title', text: g.title }), list]));
     });
-    root.appendChild(list);
+    var all = el('button', { type: 'button', class: 'link', text: 'Kaynak tabloların tamamını görüntüle', onclick: function () {
+      UI.showSources('all');
+      var s = document.getElementById('sources'); if (s) { s.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    } });
+    root.appendChild(el('p', { class: 'src start-foot' }, [all]));
   }
 
-  function entryStep(inputAttrs, helpText, validate, errorText, step) {
+  /* ---------- Soru ---------- */
+
+  function entryStep(step, inputAttrs, helpText, validate, errorText) {
     var a = state.answers;
-    root.appendChild(el('p', { class: 'help', text: helpText }));
+    if (helpText) { root.appendChild(el('p', { class: 'help', text: helpText })); }
     var input = el('input', inputAttrs);
+    if (a[step.id] != null) { input.value = a[step.id]; }
     var err = el('p', { class: 'error', hidden: true });
     var submit = function () {
       var v = validate(input.value);
@@ -63,14 +67,17 @@
       render();
     };
     input.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); submit(); } });
-    root.appendChild(el('div', { class: 'entry' }, [input, el('button', { type: 'button', class: 'btn', text: 'Devam et', onclick: submit })]));
+    var row = [input];
+    if (step.unit) { row.push(el('span', { class: 'unit', text: step.unit })); }
+    row.push(el('button', { type: 'button', class: 'btn', text: 'Devam et', onclick: submit }));
+    root.appendChild(el('div', { class: 'entry' }, row));
     root.appendChild(err);
   }
 
   function renderStep(steps, idx) {
     var step = steps[idx];
     var a = state.answers;
-    root.appendChild(el('p', { class: 'progress', text: 'Soru ' + (idx + 1) }));
+    root.appendChild(el('p', { class: 'progress' }, [el('span', { class: 'flow-name', text: state.flow.baslik }), ' · Soru ' + (idx + 1)]));
     root.appendChild(el('h1', { class: 'question', text: step.q }));
     if (step.help) { root.appendChild(el('p', { class: 'help', text: step.help })); }
 
@@ -84,21 +91,21 @@
       });
       root.appendChild(list);
     } else if (step.type === 'year') {
-      entryStep(
-        { type: 'number', id: 'wiz-year', inputmode: 'numeric', min: '1900', max: String(thisYear), placeholder: 'örneğin 2012', 'aria-label': 'Vefat yılı' },
+      entryStep(step, { type: 'number', id: 'wiz-year', inputmode: 'numeric', min: '1900', max: String(FLOWS.THIS_YEAR), placeholder: 'örneğin 2012', 'aria-label': 'Vefat yılı' },
         'Sadece yılı yazmanız yeterli.',
-        function (v) { var n = parseInt(v, 10); return n >= 1900 && n <= thisYear ? n : null; },
-        'Lütfen dört haneli bir yıl yazın (örneğin 2012).',
-        step
-      );
+        function (v) { var n = parseInt(v, 10); return n >= 1900 && n <= FLOWS.THIS_YEAR ? n : null; },
+        'Lütfen dört haneli bir yıl yazın (örneğin 2012).');
     } else if (step.type === 'date') {
-      entryStep(
-        { type: 'date', id: 'wiz-date', min: '2008-01-01', max: '2008-12-31', 'aria-label': 'Vefat tarihi' },
-        'Gün, ay ve yıl olarak seçin.',
-        function (v) { return DERIVE.validDate(v) && v >= '2008-01-01' && v <= '2008-12-31' ? v : null; },
-        'Lütfen 2008 yılı içinde bir tarih seçin.',
-        step
-      );
+      var y = String(step.year);
+      entryStep(step, { type: 'date', id: 'wiz-date', min: y + '-01-01', max: y + '-12-31', 'aria-label': 'Vefat tarihi' },
+        'Bu yıl içinde sonucu değiştiren bir tarih olduğu için gün de gerekiyor.',
+        function (v) { return DERIVE.validDate(v) && v.slice(0, 4) === y ? v : null; },
+        'Lütfen ' + y + ' yılı içinde bir tarih seçin.');
+    } else if (step.type === 'number') {
+      entryStep(step, { type: 'number', id: 'wiz-number', inputmode: 'numeric', min: String(step.min || 0), max: String(step.max || 99999), 'aria-label': step.q },
+        '',
+        function (v) { var n = parseInt(v, 10); return isFinite(n) && n >= (step.min || 0) && n <= (step.max || 99999) ? n : null; },
+        'Lütfen ' + (step.min || 0) + ' ile ' + (step.max || 99999) + ' arasında bir sayı yazın.');
     }
 
     root.appendChild(el('div', { class: 'nav' }, [
@@ -106,108 +113,114 @@
     ]));
   }
 
+  // Seçilen adımdan itibaren tüm cevapları siler
+  function resetFrom(steps, idx) {
+    for (var i = Math.max(0, idx); i < steps.length; i++) { delete state.answers[steps[i].id]; }
+  }
+
   function goBack(steps, idx) {
-    if (idx <= 0) { state.modul = null; state.answers = {}; render(); return; }
-    var a = state.answers;
-    for (var i = idx - 1; i < steps.length; i++) { delete a[steps[i].id]; }
+    if (idx <= 0) { start(null); return; }
+    resetFrom(steps, idx - 1);
     render();
   }
 
-  // Bir kişinin cevaplarını (ve ortak soruları) silip o kişinin ilk sorusuna döner
-  function changePerson(prefix) {
-    var a = state.answers;
-    Object.keys(a).forEach(function (k) { if (k.indexOf(prefix + '.') === 0) { delete a[k]; } });
-    delete a.once; delete a.donem;
-    render();
-  }
+  /* ---------- Sonuç ---------- */
 
   function formatDate(iso) {
     var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
     return m ? m[3] + '.' + m[2] + '.' + m[1] : '';
   }
 
-  function personFact(modul, p, a) {
-    var kurum = DERIVE.KURUMLAR.filter(function (k) { return k.code === a[p.prefix + '.kurum']; })[0];
-    var code = DERIVE.derive(modul, STEPS.deriveInput(p.prefix, a)).code;
-    var st = ENGINE.findStatus(RULES[modul].status, code);
+  function personFact(prefix, steps) {
+    var a = state.answers;
+    var st = steps.filter(function (s) { return s.person === prefix; })[0];
+    var who = st.q.replace(/ nerede çalışıyordu\?$/, '');
+    var kurum = DERIVE.KURUMLAR.filter(function (k) { return k.code === a[prefix + '.kurum']; })[0];
     var parts = [kurum ? kurum.label : ''];
-    if (a[p.prefix + '.devir']) { parts.push(a[p.prefix + '.devir'] === 'evet' ? 'SGK\'ya devredilmiş' : 'devredilmemiş'); }
-    if (a[p.prefix + '.yil']) { parts.push('vefat ' + (a[p.prefix + '.yil'] === 2008 ? formatDate(a[p.prefix + '.gun']) : a[p.prefix + '.yil'])); }
-    if (a[p.prefix + '.memur']) { parts.push(a[p.prefix + '.memur'] === 'once' ? 'memurluğa 15.10.2008\'den önce başlamış' : 'memurluğa 15.10.2008 veya sonrasında başlamış'); }
-    return { label: p.ad, value: parts.join(', '), code: st ? st.label + (st.tarih ? ' · ' + st.tarih : '') : code, change: function () { changePerson(p.prefix); } };
+    if (a[prefix + '.devir']) { parts.push(a[prefix + '.devir'] === 'evet' ? 'SGK’ya devredilmiş' : 'devredilmemiş'); }
+    if (a[prefix + '.yil']) {
+      var t = FLOWS.tarihOf(prefix, a);
+      parts.push('vefat ' + (a[prefix + '.gun'] && t === a[prefix + '.gun'] ? formatDate(t) : a[prefix + '.yil']));
+    }
+    if (a[prefix + '.memur']) { parts.push(a[prefix + '.memur'] === 'once' ? 'memurluğa 15.10.2008’den önce başlamış' : 'memurluğa 15.10.2008 veya sonrasında başlamış'); }
+    var code = DERIVE.statu(FLOWS.personInput(prefix, a)).code;
+    return { label: who.replace(/^Vefat eden /, '').replace(/^./, function (c) { return c.toLocaleUpperCase('tr'); }), value: parts.join(', '), code: code ? DERIVE.STATU_ADLARI[code] : '' };
   }
 
-  function answerOf(res) {
-    if (res.status === 'ok') { return { text: res.sonuc.title, tone: 'tone-' + res.sonuc.tone, plain: (TEXTS.PLAIN[state.modul] || {})[res.sonuc.key] || '' }; }
-    if (res.status === 'conflict') { return { text: res.sonuclar.map(function (s) { return s.title; }).join(' / '), tone: 'tone-warn', plain: 'Kaynak tabloda bu durum için farklı sonuç veren satırlar var.' }; }
-    return { text: TEXTS.NONE.title, tone: 'tone-none', plain: res.reason || '' };
+  function checkList(checks) {
+    return el('ul', { class: 'checks' }, checks.map(function (x) {
+      return el('li', { class: x.ok ? 'ok' : 'no' }, [el('span', { class: 'mark-ok', text: x.ok ? 'Sağlanıyor' : 'Sağlanmıyor' }), ' ' + x.text]);
+    }));
+  }
+
+  function renderCard(card, main) {
+    var box = el('section', { class: main ? 'card-main' : 'card-alt tone-' + (card.tone || 'none') });
+    box.appendChild(el('p', { class: 'card-label', text: card.label }));
+    box.appendChild(el('p', { class: main ? 'answer-big tone-' + (card.tone || 'none') : 'alt-answer', text: card.title }));
+    if (card.plain) { box.appendChild(el('p', { class: main ? 'plain' : 'alt-plain', text: card.plain })); }
+    if (card.variants) {
+      var list = el('div', { class: 'variants' });
+      card.variants.forEach(function (v) {
+        list.appendChild(el('div', { class: 'variant tone-' + (v.tone || 'none') }, [
+          el('p', { class: 'variant-label', text: v.label }),
+          el('p', { class: 'variant-answer', text: v.title }),
+          v.refs && v.refs.length ? el('p', { class: 'src' }, ['Dayanak: '].concat(UI.refLinks(v.refs))) : null
+        ]));
+      });
+      box.appendChild(list);
+    }
+    if (card.checks && card.checks.length) { box.appendChild(checkList(card.checks)); }
+    if (card.refs && card.refs.length) {
+      box.appendChild(el('p', { class: 'src' }, ['Dayanak: '].concat(UI.refLinks(card.refs))));
+      if (main) { box.appendChild(UI.refCard(card.refs)); }
+    } else if (card.near && card.near.length) {
+      box.appendChild(el('p', { class: 'src' }, ['Koşulları farklı yakın satır: '].concat(UI.refLinks(card.near))));
+    }
+    if (card.link) {
+      box.appendChild(el('p', { class: 'src' }, [el('button', { type: 'button', class: 'link', text: FLOWS.byId(card.link).title + ' sorgusuna geç', onclick: function () { start(card.link); } })]));
+    }
+    return box;
   }
 
   function renderResult(steps) {
-    var modul = state.modul;
+    var flow = state.flow;
     var a = state.answers;
-    var out = STEPS.finalEvaluate(modul, a);
-
-    var facts = STEPS.PERSONS[modul].map(function (p) { return personFact(modul, p, a); });
-    if (a.once) {
-      facts.push({ label: '1 Ekim 2008 öncesi aylık', value: a.once === 'evet' ? 'Evet' : a.once === 'hayir' ? 'Hayır' : 'Bilmiyorum', code: '', change: function () { delete a.once; render(); } });
-    }
-    if (a.donem) {
-      facts.push({ label: 'Dönem', value: a.donem === 'once2017' ? '5.12.2017 tarihi öncesi' : a.donem === 'sonra2017' ? '5.12.2017 tarihinden itibaren' : 'Bilmiyorum', code: '', change: function () { delete a.donem; render(); } });
-    }
-
-    root.appendChild(el('h1', { class: 'question', text: 'Sonuç' }));
-    var live = el('div', { role: 'status' });
-    root.appendChild(live);
-
-    var rows = [], speakText = '', printAnswer = '', printPlain = '', printTone = 'none';
-    if (!out.dual) {
-      var ans = answerOf(out.res);
-      rows = out.res.rows || [];
-      live.appendChild(el('p', { class: 'answer-big ' + ans.tone, text: ans.text }));
-      if (ans.plain) { live.appendChild(el('p', { class: 'plain', text: ans.plain })); }
-      speakText = ans.text + ' ' + ans.plain;
-      printAnswer = ans.text; printPlain = ans.plain; printTone = ans.tone.replace('tone-', '');
-      if (rows.length) {
-        root.appendChild(el('p', { class: 'src' }, ['Kaynak tablo, '].concat(UI.rowLinks(modul, rows))));
-        root.appendChild(UI.rowCard(modul, rows));
-        speakText += ' Kaynak tablo, satır ' + rows.map(function (r) { return r.row; }).join(' ve ') + '.';
-      } else if (out.res.candidates && out.res.candidates.length) {
-        root.appendChild(el('p', { class: 'src' }, ['Koşulları farklı yakın satır: '].concat(UI.rowLinks(modul, out.res.candidates))));
+    var out = flow.evaluate(a);
+    var facts = FLOWS.facts(flow, a).map(function (f) {
+      if (f.person) {
+        var p = personFact(f.person, steps);
+        return { label: p.label, value: p.value, code: p.code, index: f.index };
       }
-    } else {
-      live.appendChild(el('p', { class: 'answer-big tone-none', text: TEXTS.NONE.dual }));
-      live.appendChild(el('p', { class: 'plain', text: TEXTS.NONE.dualHelp }));
-      var list = el('div', { class: 'variants' });
-      var parts = [];
-      out.variants.forEach(function (v) {
-        var vans = answerOf(v.res);
-        var vrows = v.res.rows || [];
-        vrows.forEach(function (r) { if (rows.indexOf(r) === -1) { rows.push(r); } });
-        list.appendChild(el('div', { class: 'variant ' + vans.tone }, [
-          el('p', { class: 'variant-label', text: v.label }),
-          el('p', { class: 'variant-answer', text: vans.text }),
-          vrows.length ? el('p', { class: 'src' }, ['Kaynak tablo, '].concat(UI.rowLinks(modul, vrows))) : null
-        ]));
-        parts.push(v.label + ': ' + vans.text + (vrows.length ? ' (satır ' + vrows.map(function (r) { return r.row; }).join(', ') + ')' : ''));
-      });
-      live.appendChild(list);
-      speakText = TEXTS.NONE.dual + ' ' + parts.join('. ');
-      printAnswer = TEXTS.NONE.dual; printPlain = parts.join(' · ');
-      if (rows.length) { root.appendChild(UI.rowCard(modul, rows)); }
-    }
+      return { label: f.label, value: f.value, index: f.index };
+    });
+
+    root.appendChild(el('p', { class: 'progress' }, [el('span', { class: 'flow-name', text: flow.baslik })]));
+    root.appendChild(el('h1', { class: 'question', text: 'Sonuç' }));
+
+    var live = el('div', { role: 'status' });
+    out.cards.forEach(function (c, i) { live.appendChild(renderCard(c, i === 0)); });
+    root.appendChild(live);
 
     root.appendChild(el('ul', { class: 'facts' }, facts.map(function (f) {
       return el('li', null, [
         el('b', { text: f.label }),
         el('span', { class: 'fact-value' }, [f.value + ' ', f.code ? el('span', { class: 'fact-code', text: '(' + f.code + ')' }) : null]),
-        el('button', { type: 'button', class: 'link', text: 'Değiştir', onclick: f.change })
+        el('button', { type: 'button', class: 'link', text: 'Değiştir', onclick: function () { resetFrom(steps, f.index); render(); } })
       ]);
     })));
 
-    var linkBtn = el('button', { type: 'button', class: 'link', text: 'Bağlantıyı kopyala' });
-    linkBtn.addEventListener('click', function () { UI.copyLink(UI.linkFor(modul, out.input), linkBtn); });
-    root.appendChild(el('p', { class: 'src' }, [linkBtn]));
+    var notes = [];
+    out.cards.forEach(function (c) { notes = notes.concat(c.notes || []); (c.variants || []).forEach(function (v) { notes = notes.concat(v.notes || []); }); });
+    notes = notes.concat(out.notes || []);
+    var nl = UI.noteList(notes);
+    if (nl) { root.appendChild(nl); }
+
+    var speakText = out.cards.map(function (c) {
+      var s = (c.label ? c.label + '. ' : '') + c.title + ' ' + (c.plain || '');
+      (c.variants || []).forEach(function (v) { s += ' ' + v.label + ': ' + v.title; });
+      (c.checks || []).forEach(function (x) { s += ' ' + x.text + ': ' + (x.ok ? 'sağlanıyor.' : 'sağlanmıyor.'); });
+      return s;
+    }).join(' ');
 
     var actions = el('div', { class: 'actions' });
     if (UI.speech.supported) {
@@ -216,24 +229,29 @@
       actions.appendChild(speakBtn);
     }
     if (UI.canPrint) { actions.appendChild(el('button', { type: 'button', class: 'btn secondary', text: 'Yazdır', onclick: UI.print })); }
-    actions.appendChild(el('button', { type: 'button', class: 'btn', text: 'Baştan başla', onclick: function () { state.modul = null; state.answers = {}; render(); } }));
+    var copyBtn = el('button', { type: 'button', class: 'btn secondary', text: 'Kopyala' });
+    copyBtn.addEventListener('click', function () { UI.copySummary(copyBtn); });
+    actions.appendChild(copyBtn);
+    actions.appendChild(el('button', { type: 'button', class: 'btn', text: 'Yeni sorgu', onclick: function () { start(null); } }));
     root.appendChild(actions);
     root.appendChild(el('div', { class: 'nav' }, [
       el('button', { type: 'button', class: 'btn quiet', text: '← Geri', onclick: function () { goBack(steps, steps.length); } })
     ]));
 
+    var refs = [];
+    out.cards.forEach(function (c) { refs = refs.concat(c.refs || []); (c.variants || []).forEach(function (v) { refs = refs.concat(v.refs || []); }); });
     UI.setPrintSummary({
-      key: modul,
+      title: flow.baslik,
       facts: facts.map(function (f) { return [f.label, f.value + (f.code ? ' (' + f.code + ')' : '')]; }),
-      answer: printAnswer,
-      plain: printPlain,
-      rows: rows,
-      tone: printTone
+      cards: out.cards,
+      refs: refs,
+      notes: notes
     });
-    UI.showSource(modul);
-    UI.highlightRows(modul, rows.map(function (r) { return r.row; }));
+    var keys = refs.map(function (f) { return f.key; });
+    UI.showSources(keys);
+    UI.highlightRefs(refs);
   }
 
-  window.SGK_WIZARD = { render: render, reset: function () { state.modul = null; state.answers = {}; render(); } };
+  window.SGK_WIZARD = { render: render, start: start };
   if (document.body.getAttribute('data-mode') !== 'expert') { render(); }
 })();

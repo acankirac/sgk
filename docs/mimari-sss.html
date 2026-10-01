@@ -44,19 +44,16 @@
 <h2>1. Genel mimari</h2>
 <div class="qa"><p class="q"><span>1.1</span>Uygulama nasıl bir mimariye sahip?</p>
 <p class="a">Tamamen tarayıcıda çalışan statik bir web uygulamasıdır. Sunucu tarafında çalışan kod, veritabanı veya API yoktur. Sunucu (nginx) yalnızca HTML, CSS, JavaScript ve yazı tipi dosyalarını gönderir; tüm hesaplama kullanıcının tarayıcısında yapılır.</p>
-<div class="diagram">Kaynak Excel (.xls)
-   │  scripts/extract_excel.py  (Python, xlrd)
-   ▼
-js/excel-rows.js  ─ ham hücre metinleri + sürüm damgası
-js/rules.js       ─ her Excel satırının kodlanmış kuralı (satır numarasıyla)
-   │
-   ▼
-js/engine.js      ─ eşleştirme motoru  ◄── js/derive.js (kurum + tarih → statü)
-   │                                    ◄── js/wizard-steps.js (soru sırası)
-   ▼
-js/app.js · js/wizard.js  ─ arayüz (adım adım / hızlı giriş, yazdırma)
-   │
-   ▼
+<div class="diagram">Kaynak doküman (Özdamar, İş ve Hayat, s.118–160)
+   ├─ Tablo-2, Tablo-6, s.148–150 tablosu → Excel → js/excel-rows.js → js/rules.js + js/engine.js
+   └─ Tablo-1, 3, 4, 5, 7, 8, 9 ve metin hükümleri → js/genelge.js → js/hukum.js
+                                │
+js/derive.js  (kurum + vefat tarihi → statü, Bağ-Kur dönemleri, eşik tarihleri)
+                                │
+js/flows.js   (7 modülün soru akışı ve sonuç hesabı; arayüzden bağımsız)
+                                │
+js/app.js · js/wizard.js  (adım adım / hızlı giriş, dayanak, yazdırma)
+                                │
 nginx (statik dosya) ── HTTPS ── Tarayıcı  (service worker ile çevrimdışı)</div></div>
 
 <div class="qa"><p class="q"><span>1.2</span>Neden sunucu tarafı (backend) yok?</p>
@@ -67,21 +64,25 @@ nginx (statik dosya) ── HTTPS ── Tarayıcı  (service worker ile çevrim
 
 <div class="qa"><p class="q"><span>1.4</span>Kod hangi modüllerden oluşuyor?</p>
 <table><thead><tr><th>Dosya</th><th>Görevi</th></tr></thead><tbody>
-<tr><td>js/excel-rows.js</td><td>Excel'in üç sayfasındaki satırların ham metni ve sürüm damgası. Betikle üretilir, elle düzenlenmez.</td></tr>
-<tr><td>js/rules.js</td><td>Her Excel satırının eşleştirme kuralı. Kural, satır numarasıyla Excel'e bağlıdır.</td></tr>
-<tr><td>js/engine.js</td><td>Seçimleri kurallarla eşleştirir, sonucu ve dayanak satırı döndürür. Arayüzden bağımsızdır.</td></tr>
-<tr><td>js/derive.js</td><td>Kurum ve vefat tarihinden tablodaki statü kodunu türetir (tarih eşikleri burada).</td></tr>
-<tr><td>js/wizard-steps.js</td><td>Adım adım modun soru sırası ve hesaplama mantığı. Arayüzden bağımsızdır.</td></tr>
-<tr><td>js/texts.js</td><td>Arayüz metinleri (sonuçların sade karşılığı, kısa adlar).</td></tr>
-<tr><td>js/app.js, js/wizard.js</td><td>Arayüz: iki mod, kaynak tablo, çapraz tablo, yazdırma, sesli okuma.</td></tr>
-<tr><td>js/config.js</td><td>Kurulum ayarları (izin alındığında kurum logosu).</td></tr>
+<tr><td>js/excel-rows.js</td><td>Tablo-2, Tablo-6 ve s.148–150 tablosunun Excel aktarımı ve sürüm damgası. Betikle üretilir.</td></tr>
+<tr><td>js/genelge.js</td><td>Kaynak dokümandaki Tablo-1, 3, 4, 5, 7, 8, 9'un birebir aktarımı ve sonuçlarda gösterilen hükümler (sayfa numaralarıyla).</td></tr>
+<tr><td>js/rules.js, js/engine.js</td><td>Excel tablolarının kuralları ve eşleştirme motoru.</td></tr>
+<tr><td>js/hukum.js</td><td>Prim şartı, kız çocuğu ve anne hak sahipliği, aynı statü (Tablo-8), 5.12.2017 öncesi uygulama (Tablo-9) ve Yargıtay ilkesinin kuralları.</td></tr>
+<tr><td>js/derive.js</td><td>Kurum ve vefat tarihinden statü türetme; Bağ-Kur dönemleri ve eşik tarihleri.</td></tr>
+<tr><td>js/flows.js</td><td>Yedi modülün soru akışı ve sonuç hesabı. Arayüzden bağımsızdır, Node'da test edilir.</td></tr>
+<tr><td>js/app.js, js/wizard.js</td><td>Arayüz: iki mod, kaynak tablolar, dayanak bağlantıları, A4 yazdırma, sesli okuma.</td></tr>
+<tr><td>js/config.js</td><td>Kurum adı ve resmi logo dosyası.</td></tr>
 <tr><td>sw.js, manifest</td><td>Çevrimdışı çalışma ve telefona uygulama olarak ekleme.</td></tr>
 </tbody></table></div>
 
 <div class="qa"><p class="q"><span>1.5</span>Uygulamanın boyutu ne kadar?</p>
-<p class="a">Yazı tipleri ve simgeler dahil tüm dosyalar yaklaşık 260 KB'tır. İlk açılıştan sonra dosyalar tarayıcı önbelleğinden gelir.</p></div>
+<p class="a">Yazı tipleri ve simgeler dahil tüm dosyalar yaklaşık 340 KB'tır. İlk açılıştan sonra dosyalar tarayıcı önbelleğinden gelir.</p></div>
 
 <h2>2. Veri ve kurallar</h2>
+<div class="qa"><p class="q"><span>2.0</span>Uygulama hangi konuları kapsıyor?</p>
+<p class="a">Yedi modül vardır: eşten ve anne-babadan iki aylık; anne ve babadan iki aylık; iki eşten aylık; kız çocuğunun hak sahipliği; annenin hak sahipliği; dul eşin hak sahipliği ve aylık hissesi; ölüm aylığı için prim şartı. Eşten ve anne-babadan ile kız çocuğu modüllerinde SGK uygulamasının yanında Yargıtay görüşü ayrıca gösterilir.</p>
+<p class="a">Kaynak doküman bir SGK genelgesi değil, SGK denetmeni Murat Özdamar'ın İş ve Hayat dergisinde yayımlanan makalesidir; kurallar canlı kullanımdan önce kurumun güncel genelgeleriyle karşılaştırılarak onaylanmalıdır.</p></div>
+
 <div class="qa"><p class="q"><span>2.1</span>Excel tablosu uygulamaya nasıl aktarılıyor?</p>
 <p class="a"><code>scripts/extract_excel.py</code> betiği Excel'in üç sayfasını okur, hücre metinlerini düzenler ve <code>js/excel-rows.js</code> ile <code>data/excel-rows.json</code> dosyalarını üretir. Aynı anda dosyanın SHA-256 özetinden bir sürüm damgası çıkarılır.</p></div>
 
@@ -102,12 +103,12 @@ nginx (statik dosya) ── HTTPS ── Tarayıcı  (service worker ile çevrim
 
 <h2>3. Doğruluk ve test</h2>
 <div class="qa"><p class="q"><span>3.1</span>Sonuçların Excel ile aynı olduğu nasıl garanti ediliyor?</p>
-<p class="a">31 otomatik test vardır (<code>npm test</code>). Testler:</p>
+<p class="a">48 otomatik test vardır (<code>npm test</code>). Testler:</p>
 <ul><li>Her kuralı, Excel hücre metninden bağımsız olarak türetilen kodlarla karşılaştırır.</li>
 <li>Her Excel satırının kapsadığı her durum için motorun aynı sonucu verdiğini doğrular.</li>
 <li>Hiçbir girdi kombinasyonunun birbiriyle çelişen satırlara düşmediğini kontrol eder.</li>
-<li>Adım adım modu 55.872 kombinasyonda çalıştırıp hızlı girişle aynı sonucu verdiğini doğrular.</li>
-<li>Tarih eşiklerini sınır günlerde (30.9.2008, 1.10.2008, 14.10.2008, 15.10.2008) test eder.</li>
+<li>Yedi modülün soru akışını tüm cevap kombinasyonlarında (12.600'ü aşkın yol) dolaşıp her sonucun doğrudan hesapla aynı olduğunu doğrular.</li><li>Tablo-9'un 30 kuralını tablo hücrelerinden bağımsız türetilen kodlarla karşılaştırır.</li>
+<li>Tarih eşiklerini sınır günlerde (1.10.2008, 15.10.2008, 4.10.2000, 8.8.2001, 2.8.2003, 6.8.2003, 8.9.1999) test eder.</li>
 <li>Metinlerde hukuki yorum ya da yönlendirme ifadesi olmadığını, sürüm damgasının Excel ile uyuştuğunu denetler.</li></ul></div>
 
 <div class="qa"><p class="q"><span>3.2</span>Tarayıcıda elle yapılması gereken kontroller var mı?</p>

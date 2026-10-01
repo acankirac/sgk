@@ -92,8 +92,65 @@
     return KURUMLAR.filter(function (k) { return !!HARITA[modul] && (k.code !== 'banka' || !!HARITA[modul].bankaAktif); });
   }
 
+  /* ---------- Kanun bazlı statü (makale tabloları 1, 3, 4, 5, 7, 8, 9) ---------- */
+
+  // Kanun bazlı statü kodları:
+  //   SSK (506) · 4A · BK (1479) · 4B · TBK (2926) · 4B4 · TSSK (2925) · ES (5434) · 4C · BSA (banka aktif) · BSD (banka devir)
+  var STATU_ADLARI = {
+    SSK: 'SSK (506 sayılı Kanun)', '4A': '5510 sayılı Kanun 4/I-(a)', BK: 'Bağ-Kur (1479 sayılı Kanun)', '4B': '5510 sayılı Kanun 4/I-(b)',
+    TBK: 'Tarım Bağ-Kur (2926 sayılı Kanun)', '4B4': '5510 sayılı Kanun 4/I-(b.4) Tarım', TSSK: 'Tarım SSK (2925 sayılı Kanun)',
+    ES: 'Emekli Sandığı (5434 sayılı Kanun)', '4C': '5510 sayılı Kanun 4/I-(c)', BSA: 'Banka Sandığı (aktif)', BSD: 'Banka Sandığı (SGK\'ya devredilmiş)'
+  };
+
+  function statu(input) {
+    var kurum = input.kurum || null;
+    var tarih = validDate(input.tarih) ? input.tarih : null;
+    var memur = input.memur || null;
+    var devir = typeof input.devir === 'boolean' ? input.devir : null;
+    if (!kurum) { return { needs: 'kurum' }; }
+    if (kurum === 'tarimssk') { return { code: 'TSSK' }; }
+    if (kurum === 'banka') {
+      if (devir === null) { return { needs: 'devir' }; }
+      return { code: devir ? 'BSD' : 'BSA' };
+    }
+    if (!tarih) { return { needs: 'tarih' }; }
+    var pre = before(tarih, ESIK_5510);
+    if (kurum === 'ssk') { return { code: pre ? 'SSK' : '4A' }; }
+    if (kurum === 'bagkur') { return { code: pre ? 'BK' : '4B' }; }
+    if (kurum === 'tarimbagkur') { return { code: pre ? 'TBK' : '4B4' }; }
+    if (kurum === 'emekli') {
+      if (before(tarih, ESIK_4C)) { return { code: 'ES' }; }
+      if (!memur) { return { needs: 'memur' }; }
+      return { code: memur === 'once' ? 'ES' : '4C' };
+    }
+    return { needs: 'kurum' };
+  }
+
+  function between(iso, a, b) { return iso >= a && iso <= b; }
+
+  // Bağ-Kur ve Tarım Bağ-Kur dönemleri (makale Tablo-1, 3, 7, 9):
+  //   'A': 4.10.2000 öncesi veya 8.8.2001–1.8.2003 arası
+  //   'B': 4.10.2000–7.8.2001 arası veya 2.8.2003–30.9.2008 arası
+  function bkDonem(iso) {
+    if (!validDate(iso) || iso >= ESIK_5510) { return null; }
+    if (iso < '2000-10-04' || between(iso, '2001-08-08', '2003-08-01')) { return 'A'; }
+    return 'B';
+  }
+
+  // Bir yılda sonucu değiştiren eşik tarihi varsa tam gün sorulmalıdır.
+  var ESIK_TARIHLERI = ['1972-10-01', '1999-09-08', '2000-10-04', '2001-08-08', '2003-08-02', '2003-08-06', '2008-10-01', '2008-10-15'];
+  function gunGerekir(yil) {
+    return ESIK_TARIHLERI.some(function (d) { return Number(d.slice(0, 4)) === Number(yil); });
+  }
+
   var DERIVE = {
     ESIK_5510: ESIK_5510,
+    STATU_ADLARI: STATU_ADLARI,
+    statu: statu,
+    bkDonem: bkDonem,
+    between: between,
+    gunGerekir: gunGerekir,
+    ESIK_TARIHLERI: ESIK_TARIHLERI,
     ESIK_4C: ESIK_4C,
     KURUMLAR: KURUMLAR,
     kurumlar: kurumlar,

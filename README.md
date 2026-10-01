@@ -1,38 +1,49 @@
 # Çift Aylık Sorgusu
 
-Ölen eşinden, anne ve babasından ya da birden fazla eşinden aylığa hak kazanan
-kadına **iki aylık mı, tek aylık mı** bağlanacağını, kaynak Excel tablosundaki
-satıra dayanarak gösteren statik web uygulaması.
+Ölüm aylığında hak sahipliğini ve eşten, anne-babadan ya da iki eşten
+**iki aylık mı, tek aylık mı** bağlanacağını, kaynak dokümandaki tablolara
+dayanarak gösteren statik web uygulaması.
 
-Kaynak: `data/kadinlara_esinden_anne_babasindan.xls` (3 sayfa, 88 veri satırı).
-Uygulama yalnızca bu tablodaki satırları uygular; tabloda bulunmayan
-kombinasyonlar için yorum yapmaz, "tabloda satır yok" der.
+**Kaynak doküman:** Murat Özdamar (SGK Denetmeni), "Kadınlara Eşinden
+Anne-Babasından ve Çocuğundan Ölüm Aylığı Bağlanması", *İş ve Hayat*, s.118–160.
+Dokümandaki 9 numaralı tablo ve s.148–150'deki numarasız tablo uygulamada
+birebir kodlanmıştır. Uygulama yalnızca bu tabloları ve metindeki hükümleri
+uygular; tabloda karşılığı olmayan durumda "Kaynak tabloda bu durum için satır
+yok" der. Her sonuç dayanak tablo satırını (tablo no, sayfa, satır) gösterir.
 
-## İki mod
-
-**Adım adım** (varsayılan, yaşlı kullanıcılar için): her ekranda tek soru,
-büyük seçenekler. Kullanıcı kurumu ("SSK", "Bağ-Kur", "Emekli Sandığı" …) ve
-vefat yılını söyler; tablodaki statü (ör. "5510 4/I-(a), ölüm 30.9.2008
-sonrası") uygulama tarafından türetilir. Yıl 2008 ise gün sorulur; Emekli
-Sandığı için gerekirse memuriyete başlangıç (15.10.2008), Banka Sandığı için
-devir sorusu eklenir. Evet/Hayır ve 5.12.2017 sorularında "Bilmiyorum"
-seçilirse iki olasılığın cevabı kaynak satırlarıyla yan yana gösterilir.
-
-**Hızlı giriş** (SGK personeli için): tablodaki statüler doğrudan açılır
-listeden seçilir, cevap anında güncellenir; sorgu adres çubuğunda taşınır
-(`#esAnneBaba?es=A&ab=BK&once=hayir`), "Bağlantıyı kopyala" ile paylaşılır.
-
-Her iki modda cevabın altında dayanak satırın numarası, isteğe bağlı açılan
-satır kartı (başlık–değer) ve sayfa altında kaynak tablo (liste veya statü ×
-statü çapraz görünüm, arama kutusu) bulunur.
+> Not: Kaynak bir SGK genelgesi değil, SGK denetmeninin yayımlanmış makalesidir.
+> Canlı kullanımdan önce kurumun güncel genelgeleriyle (ör. 2018-38 sayılı
+> Emeklilik İşlemleri Genelgesi) karşılaştırılarak onaylanmalıdır.
 
 ## Modüller
 
-| Sekme | Excel sayfası | Girdi | Sonuç |
-| --- | --- | --- | --- |
-| Eşten ve anne-babadan | `eşten-anne-babadan` (60 satır) | Ölen eşin statüsü, ölen anne/babanın statüsü, anne/babadan 1.10.2008 öncesi aylık bağlanıp bağlanmadığı | İki aylık / Tek aylık |
-| Anne ve babadan | `anne-babadan`, Tablo-6 (11 satır) | Baba ve annenin statüsü, ölüm tarihleri durumu, gerekirse 5.12.2017 uygulama dönemi | Yüksek tam-düşük yarım / Tercih edilen (tam) / İki tam aylık / Yüksek olan |
-| İki eşten | `dul eşe` (16 satır) | Ölen ilk ve ikinci eşin tabi olduğu kanun | Tercih edilen aylık / İki aylık |
+| Modül | Dayanak | Sonuç |
+| --- | --- | --- |
+| Eşten ve anne-babadan aylık | 5.12.2017 sonrası: s.148–150 tablosu + Tablo-8 · 5.12.2017 öncesi: Tablo-9 + Tablo-8 · Yargıtay ilkesi (s.151) | İki aylık / Tek aylık / Tercih ettiği (yüksek) aylık / Fazla olan aylık / Yalnızca eşten |
+| Anne ve babadan aylık | Tablo-6 · evlat edinme hükmü (s.132) · dipnot 28, 29 | Yüksek tam-düşük yarım / İki tam / Tercih edilen / Yüksek olan |
+| İki eşten aylık | Tablo-2 · dipnot 16, 17 · m.54/son | Tercih edilen / İki aylık |
+| Kız çocuğunun hak sahipliği | Tablo-3 (5.12.2017 öncesi), Tablo-4 (sonrası), Tablo-5 (Yargıtay) · malul istisnası | Hak sahibi / değil, koşul koşul |
+| Annenin hak sahipliği | Tablo-7 · s.135–141 hükümleri | Hak sahibi / değil, koşul koşul |
+| Dul eşin hak sahipliği ve hissesi | s.123–124 hükümleri (evlilik, yeniden evlenme, %75 / %60 / %50) | Hak sahipliği ve hisse oranı |
+| Ölüm aylığı için prim şartı | Tablo-1 · s.121 | Prim şartı sağlanıyor / sağlanmıyor |
+
+Eşten ve anne-babadan ile kız çocuğu modüllerinde SGK uygulamasının yanında
+Yargıtay görüşü ayrı bir kartta gösterilir.
+
+## İki mod
+
+**Adım adım** (varsayılan, vatandaş için): her ekranda tek soru, büyük
+seçenekler. Kullanıcı kurumu ve vefat yılını söyler; tablodaki statü
+(ör. "5510 4/I-(a), ölüm 30.9.2008 sonrası") uygulama tarafından türetilir.
+Yalnızca sonucu değiştiren eşik tarihlerinin bulunduğu yıllarda (1.10.2008,
+15.10.2008, Bağ-Kur için 4.10.2000 / 8.8.2001 / 2.8.2003, SSK için 6.8.2003,
+Tarım SSK için 8.9.1999) gün sorulur. Koşul soruları yalnızca ilgili tabloda
+aranan koşullar için sorulur. Evet/Hayır ve 5.12.2017 sorularında "Bilmiyorum"
+seçilirse iki olasılığın cevabı birlikte gösterilir.
+
+**Hızlı giriş** (personel için): Tablo-2, Tablo-6 ve s.148–150 tablosu için
+statüler doğrudan seçilir; sonuç anında güncellenir, sorgu bağlantı olarak
+paylaşılır, kaynak tabloda statü × statü çapraz görünüm vardır.
 
 ## Erişilebilirlik ve diğer özellikler
 
@@ -76,26 +87,24 @@ HTTPS sertifikası alır (varsayılan alan adı sgk.krccorp.net).
 ## Dosya yapısı
 
 ```
-index.html            Arayüz iskeleti (adım adım + hızlı giriş + kaynak tablolar)
-css/app.css           Stil (açık/koyu tema, yazı boyutu kademeleri, yazdırma)
-css/fonts.css         Yerel yazı tipi tanımları (assets/fonts/)
-js/excel-rows.js      Excel satırlarının ham metni ve sürüm damgası (üretilir)
-js/rules.js           Excel satırlarının kodlanmış hali (statü kodları, kurallar)
-js/engine.js          Eşleştirme motoru (arayüzden bağımsız)
-js/derive.js          Kurum + vefat tarihinden statü türetme (adım adım mod)
-js/texts.js           Arayüz metinleri (sonuçların sade karşılığı, kısa adlar)
-js/wizard-steps.js    Adım adım modun mantığı (soru sırası, motor girdisi; DOM'suz)
-js/wizard.js          Adım adım modun görünümü
-js/app.js             Ortak arayüz, hızlı giriş formları, kaynak tablo, yazdırma
-sw.js, manifest.webmanifest, assets/   Çevrimdışı çalışma ve simgeler
-data/*.xls            Kaynak Excel
-data/excel-rows.json  Testlerin karşılaştırma için kullandığı ham satırlar
-scripts/extract_excel.py  Excel'den excel-rows.js / .json üretir
-scripts/kontrol-listesi.md  Demo öncesi elle kontrol listesi
-tests/engine.test.js  Kural ve motor doğrulama testleri
-tests/derive.test.js  Tarih eşiği ve statü türetme testleri
-tests/wizard-steps.test.js  Sihirbazın her kombinasyonda hızlı girişle aynı sonucu verdiği
-tests/texts.test.js   Metinlerde yasak ifade olmadığı, sürüm damgasının Excel ile uyuştuğu
+index.html              Arayüz iskeleti
+css/app.css, fonts.css  Stil (açık/koyu tema, yazı boyutu, A4 yazdırma) ve yerel yazı tipi
+js/config.js            Kurum adı ve logosu
+js/excel-rows.js        Tablo-2, Tablo-6 ve s.148–150 tablosunun Excel aktarımı (üretilir)
+js/genelge.js           Kaynak dokümandaki diğer tablolar (1, 3, 4, 5, 7, 8, 9) ve hükümler
+js/rules.js             Excel tablolarının kodlanmış kuralları
+js/engine.js            Excel tabloları için eşleştirme motoru
+js/hukum.js             Tablo-1, 3, 4, 5, 7, 8, 9 ve Yargıtay ilkesinin kuralları
+js/derive.js            Kurum + vefat tarihinden statü, Bağ-Kur dönemleri, eşik tarihleri
+js/flows.js             Yedi modülün soru akışları ve sonuç hesabı (DOM'suz)
+js/texts.js             Sonuç metinleri
+js/app.js               Ortak arayüz: kaynak tablolar, dayanak, hızlı giriş, yazdırma
+js/wizard.js            Adım adım modun görünümü
+sw.js, manifest.webmanifest, assets/   Çevrimdışı çalışma, simgeler, yazı tipi
+data/                   Kaynak Excel ve ham satırlar
+docs/                   Mimari ve sık sorulan sorular dokümanı
+deploy/                 Sunucu kurulum betikleri ve nginx yapılandırması
+tests/                  Otomatik testler
 ```
 
 ## Doğrulama
@@ -106,18 +115,17 @@ npm test
 
 Testler şunları garanti eder:
 
-- `js/rules.js` içindeki her kural, Excel'deki karşılık gelen satırın hücre
-  metinlerinden **otomatik türetilen** kodlarla birebir aynıdır (statüler,
-  tarih koşulları, Evet/Hayır sütunu, sonuç).
-- Motor, her Excel satırını (satırın kapsadığı her statü, tarih ve Evet/Hayır
-  değeri için) aynen üretir; hiçbir girdi çelişen satırlara düşmez.
-- Kurum + tarih türetmesi tablodaki eşikleri (1.10.2008, 15.10.2008) aynen
-  uygular ve yalnızca tabloda bulunan statü kodlarını üretir.
-- Adım adım mod, her kurum × yıl × ek soru kombinasyonunda (55 binden fazla)
-  hızlı girişle aynı sonucu verir; ortak sorular yalnızca gerektiğinde sorulur.
-- Arayüz metinlerinde hukuki yorum ya da yönlendirme ifadesi yoktur; sürüm
-  damgası kaynak Excel'in özetiyle uyuşur (Excel değişip `npm run extract`
-  çalıştırılmazsa test kırılır).
+- Excel tablolarının kuralları hücre metinlerinden bağımsız türetilen
+  kodlarla birebir aynıdır; motor her satırı aynen üretir.
+- Tablo-9'un 30 kuralı tablo hücrelerinden türetilenle aynıdır; hiçbir
+  girdi çelişen satırlara düşmez. Tablo-1, 3, 4, 5, 7, 8 satır eşleşmeleri ve
+  sınır günleri (ör. 3.10.2000 / 4.10.2000, 5.8.2003 / 6.8.2003, 7.9.1999 /
+  8.9.1999) ayrı ayrı test edilir.
+- Yedi modülün soru akışı tüm cevap kombinasyonlarında (12.600'ü aşkın yol)
+  dolaşılır: her yol biter, aynı soru iki kez sorulmaz, sonuç doğrudan hesapla
+  aynıdır, dayanak satırları ve hüküm notları tanımlıdır.
+- Arayüz metinlerinde hukuki yorum veya yönlendirme ifadesi yoktur; tablo
+  sürüm damgası kaynak Excel ile uyuşur.
 
 ## Excel'i güncelleme
 

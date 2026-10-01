@@ -16,6 +16,7 @@
   --accent-text: #ffffff;
   --accent-soft: #e8eff9;
   --hit: #fff3c4;
+  --bad: #a12c2c;
   --good-bg: #e6f4ea;
   --good-fg: #145532;
   --good-line: #b8dcc4;
@@ -51,6 +52,8 @@
     --accent-text: #0f1419;
     --accent-soft: #1c2b45;
     --hit: #3d3617;
+  --bad: #f3a3a3;
+    --bad: #f3a3a3;
     --good-bg: #163022;
     --good-fg: #9be0b6;
     --good-line: #245a3a;
@@ -452,6 +455,55 @@ table.grid td.g-mixed { background: var(--hit); font-weight: 600; }
 table.grid td.g-none { color: var(--muted); }
 table.grid td button { font: inherit; background: none; border: 0; color: inherit; cursor: pointer; padding: 0; width: 100%; }
 
+
+/* ---------- Modül grupları ve sonuç kartları ---------- */
+
+.group { margin-top: 1.6rem; }
+.group-title { margin: 0; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.group .choices-big { margin-top: 0.6rem; }
+.start-foot { margin-top: 1.6rem; }
+.flow-name { font-weight: 600; }
+.unit { color: var(--muted); font-size: 1.1rem; }
+
+.card-main { margin-top: 0.4rem; }
+.card-label { margin: 0.4rem 0 0; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.card-alt {
+  margin-top: 1.2rem;
+  padding: 0.9rem 1.1rem 1rem;
+  border: 1px solid var(--none-line);
+  border-left-width: 4px;
+  border-radius: 10px;
+  background: var(--sheet);
+}
+.card-alt.tone-good { border-left-color: var(--good-fg); }
+.card-alt.tone-warn { border-left-color: var(--warn-fg); }
+.card-alt.tone-info { border-left-color: var(--info-fg); }
+.card-alt .card-label { margin-top: 0; }
+.alt-answer { margin: 0.2rem 0 0; font-size: 1.25rem; font-weight: 600; }
+.card-alt.tone-good .alt-answer { color: var(--good-fg); }
+.card-alt.tone-info .alt-answer { color: var(--info-fg); }
+.alt-plain { margin: 0.4rem 0 0; color: var(--text); }
+
+.checks { list-style: none; margin: 0.9rem 0 0; padding: 0; display: grid; gap: 0.35rem; }
+.checks li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.6rem; padding: 0.45rem 0.7rem; border-radius: 8px; background: var(--none-bg); }
+.checks .mark-ok { flex: none; min-width: 6.6rem; font-size: 0.85rem; font-weight: 600; }
+.checks li.ok .mark-ok { color: var(--good-fg); }
+.checks li.no { background: var(--warn-bg); }
+.checks li.no .mark-ok { color: var(--bad); }
+
+.notes { margin-top: 1.3rem; }
+.notes summary { cursor: pointer; color: var(--accent); font-size: 0.98rem; list-style: none; width: fit-content; }
+.notes summary::-webkit-details-marker { display: none; }
+.notes summary::before { content: "▸ "; }
+.notes[open] summary::before { content: "▾ "; }
+.notes ul { margin: 0.6rem 0 0; padding-left: 1.1rem; display: grid; gap: 0.45rem; font-size: 0.95rem; }
+.note-page { color: var(--muted); white-space: nowrap; }
+
+.wm-kurum { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255, 255, 255, 0.8); }
+.src-no { font-weight: 600; color: var(--text); }
+.src-page { color: var(--muted); }
+#sources.all .source { margin-top: 10px; }
+
 /* ---------- Yazdırma özeti (A4) ---------- */
 
 #print-summary { display: none; }
@@ -503,6 +555,16 @@ table.grid td button { font: inherit; background: none; border: 0; color: inheri
   .p-row th { background: #f4f6f9; }
   .p-row tr.last td { font-weight: 600; }
 
+  .p-result.p-alt { margin-top: 8pt; padding: 8pt 12pt; background: #fff; }
+  .p-result.p-alt .p-answer { font-size: 13pt; }
+  .p-checks, .p-list { margin: 6pt 0 0; padding: 0; list-style: none; font-size: 10pt; }
+  .p-checks li, .p-list li { padding: 2pt 0; }
+  .p-checks b { display: inline-block; min-width: 62pt; }
+  .p-checks li.no b { color: #a12c2c; }
+  .p-checks li.ok b { color: #145532; }
+  .p-notes { margin: 0; padding-left: 14pt; font-size: 9.5pt; color: #374151; }
+  .p-notes li { margin: 2pt 0; }
+  .p-brand .wm-kurum { font-size: 8pt; color: #5b6675; letter-spacing: 0.06em; text-transform: uppercase; }
   .p-foot { margin-top: 22pt; padding-top: 8pt; border-top: 1pt solid #dfe4ea; font-size: 8.5pt; color: #6b7280; }
   .p-foot p { margin: 0 0 2pt; }
 }

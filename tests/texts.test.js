@@ -10,7 +10,7 @@ const crypto = require('node:crypto');
 
 const RULES = require('../js/rules.js');
 const TEXTS = require('../js/texts.js');
-const STEPS = require('../js/wizard-steps.js');
+const F = require('../js/flows.js');
 
 const FORBIDDEN = ['madde', 'kanuna göre', 'gereğince', 'hakkınız', 'hak kazanırsınız', 'başvurun', 'muhtemelen', 'tahminen', 'yapay zeka', 'akıllı', '!'];
 
@@ -24,7 +24,7 @@ function collect(obj, out = []) {
 test('sonuç ve açıklama metinlerinde yasak ifade yok', () => {
   const texts = collect(TEXTS).concat(
     collect(RULES.esAnneBaba.sonuc), collect(RULES.anneBaba.sonuc), collect(RULES.dulEs.sonuc),
-    collect(STEPS.PERSONS), collect(STEPS.VARIANTS)
+    collect(F.KOSUL_SORU), collect(F.FLOWS.map((f) => [f.title, f.desc, f.baslik])), collect(require('../js/genelge.js').NOTES)
   );
   assert.ok(texts.length > 20);
   for (const t of texts) {
