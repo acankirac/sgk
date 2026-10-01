@@ -26,6 +26,11 @@
       <button type="button" role="tab" id="tab-esAnneBaba" aria-controls="panel-esAnneBaba" aria-selected="true" data-tab="esAnneBaba">Eşten ve anne-babadan (5.12.2017 sonrası)</button>
       <button type="button" role="tab" id="tab-anneBaba" aria-controls="panel-anneBaba" aria-selected="false" tabindex="-1" data-tab="anneBaba">Anne ve babadan</button>
       <button type="button" role="tab" id="tab-dulEs" aria-controls="panel-dulEs" aria-selected="false" tabindex="-1" data-tab="dulEs">İki eşten</button>
+      <button type="button" role="tab" id="tab-esTam" aria-controls="panel-form" aria-selected="false" tabindex="-1" data-tab="esTam">Eş + anne-baba (tüm dönemler)</button>
+      <button type="button" role="tab" id="tab-kiz" aria-controls="panel-form" aria-selected="false" tabindex="-1" data-tab="kiz">Kız çocuğu</button>
+      <button type="button" role="tab" id="tab-anne" aria-controls="panel-form" aria-selected="false" tabindex="-1" data-tab="anne">Anne</button>
+      <button type="button" role="tab" id="tab-dulHak" aria-controls="panel-form" aria-selected="false" tabindex="-1" data-tab="dulHak">Dul eş</button>
+      <button type="button" role="tab" id="tab-prim" aria-controls="panel-form" aria-selected="false" tabindex="-1" data-tab="prim">Prim şartı</button>
     </nav>
   </header>
 
@@ -100,6 +105,12 @@
             </div>
           </form>
           <div class="answer" id="result-dulEs" aria-live="polite"></div>
+        </section>
+
+        <section class="panel" id="panel-form" role="tabpanel" hidden>
+          <h1 id="form-title"></h1>
+          <p class="sub" id="form-sub"></p>
+          <div id="form-host"></div>
         </section>
 
       </section>

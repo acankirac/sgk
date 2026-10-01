@@ -11,6 +11,9 @@
   var G = window.SGK_GENELGE;
   var HUKUM = window.SGK_HUKUM;
   var TABS = ['esAnneBaba', 'anneBaba', 'dulEs'];
+  // Hızlı girişte tek sayfalık form olarak gösterilen modüller (sekme -> akış)
+  var FORM_TABS = { esTam: 'esAnneBaba', kiz: 'kiz', anne: 'anne', dulHak: 'dulHak', prim: 'prim' };
+  function isFormTab(k) { return Object.prototype.hasOwnProperty.call(FORM_TABS, k); }
   var SHORT = TEXTS.SHORT;
 
   var inArtifact = !!window.SGK_IN_ARTIFACT || !!window.claude || /claude/i.test(location.hostname) ||
@@ -309,7 +312,7 @@
     toggle.setAttribute('aria-pressed', expert ? 'true' : 'false');
     store('sgk-mode', expert ? 'expert' : 'wizard');
     try { history.replaceState(null, '', expert ? hashFor(currentTab) : location.pathname + location.search); } catch (e) { /* yok say */ }
-    if (expert) { showSources([currentTab]); runAll(); }
+    if (expert) { setTab(currentTab); }
     else if (window.SGK_WIZARD) { window.SGK_WIZARD.render(); }
   }
 
@@ -329,8 +332,14 @@
       tab.tabIndex = on ? 0 : -1;
     });
     TABS.forEach(function (k) { $('#panel-' + k).hidden = k !== key; });
-    showSources([key]);
-    runAll();
+    $('#panel-form').hidden = !isFormTab(key);
+    if (isFormTab(key)) {
+      showSources(null);
+      if (window.SGK_WIZARD) { window.SGK_WIZARD.renderForm(FORM_TABS[key], $('#panel-form')); }
+    } else {
+      showSources([key]);
+      runAll();
+    }
     syncHash(key);
   }
 
@@ -558,6 +567,7 @@
 
   // Hızlı giriş durumu adres çubuğunda taşınır: #esAnneBaba?es=A&ab=BK&once=evet
   function hashFor(key) {
+    if (isFormTab(key)) { return '#' + key; }
     var st = state[key];
     var parts = [];
     Object.keys(st).forEach(function (k) { if (st[k]) { parts.push(k + '=' + encodeURIComponent(st[k])); } });
@@ -575,7 +585,7 @@
         if (i > 0) { params[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1)); }
       });
     }
-    return { key: TABS.indexOf(key) !== -1 ? key : null, params: params };
+    return { key: TABS.indexOf(key) !== -1 || isFormTab(key) ? key : null, params: params };
   }
 
   function syncHash(key) {
@@ -695,7 +705,7 @@
   // Bağlantıyla gelen sorguyu formlara yazar
   function applyHashParams() {
     var parsed = parseHash();
-    if (!parsed.key) { return; }
+    if (!parsed.key || isFormTab(parsed.key)) { return; }
     var st = state[parsed.key];
     var p = parsed.params;
     var controls = {
@@ -741,7 +751,8 @@
     copyLink: copyLink,
     setPrintSummary: setPrintSummary,
     copySummary: copySummary,
-    print: function () { if (canPrint) { window.print(); } }
+    print: function () { if (canPrint) { window.print(); } },
+    refreshTab: function () { setTab(currentTab); }
   };
 
   initKurum();

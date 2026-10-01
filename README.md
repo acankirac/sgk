@@ -41,9 +41,13 @@ Tarım SSK için 8.9.1999) gün sorulur. Koşul soruları yalnızca ilgili tablo
 aranan koşullar için sorulur. Evet/Hayır ve 5.12.2017 sorularında "Bilmiyorum"
 seçilirse iki olasılığın cevabı birlikte gösterilir.
 
-**Hızlı giriş** (personel için): Tablo-2, Tablo-6 ve s.148–150 tablosu için
-statüler doğrudan seçilir; sonuç anında güncellenir, sorgu bağlantı olarak
-paylaşılır, kaynak tabloda statü × statü çapraz görünüm vardır.
+**Hızlı giriş** (personel için): yedi modülün hepsi tek sayfalık formdur.
+Tablo-2, Tablo-6 ve s.148–150 tablosunda statü doğrudan seçilir, sorgu bağlantı
+olarak paylaşılır ve kaynak tabloda statü × statü çapraz görünüm vardır. Diğer
+modüllerde (eş + anne-baba tüm dönemler, kız çocuğu, anne, dul eş, prim şartı)
+adım adım moddaki soruların tamamı tek formda görünür; bir alan değişince
+sonuç anında güncellenir. Sekmelere doğrudan bağlantı verilebilir
+(`#kiz`, `#anne`, `#dulHak`, `#prim`, `#esTam`).
 
 ## Erişilebilirlik ve diğer özellikler
 

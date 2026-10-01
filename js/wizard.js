@@ -252,6 +252,113 @@
     UI.highlightRefs(refs);
   }
 
-  window.SGK_WIZARD = { render: render, start: start };
-  if (document.body.getAttribute('data-mode') !== 'expert') { render(); }
+  /* ---------- Hızlı giriş: aynı akış tek sayfada form olarak ---------- */
+
+  var formAnswers = {};
+
+  function fieldId(flowId, stepId) { return 'f-' + flowId + '-' + stepId.replace(/[^a-zA-Z0-9]/g, '-'); }
+
+  function formField(flow, step, a, onChange) {
+    var id = fieldId(flow.id, step.id);
+    var label = el('label', { 'for': id, text: step.q });
+    var control;
+    if (step.type === 'choice') {
+      control = el('select', { id: id });
+      control.appendChild(el('option', { value: '', text: 'Seçin' }));
+      step.options.forEach(function (o) {
+        var opt = el('option', { value: o.code, text: o.label + (o.desc && step.id.slice(-6) === '.kurum' ? ' · ' + o.desc : '') });
+        if (a[step.id] === o.code) { opt.selected = true; }
+        control.appendChild(opt);
+      });
+      control.addEventListener('change', function () { onChange(step.id, control.value || null); });
+    } else {
+      var attrs = { id: id, inputmode: 'numeric' };
+      if (step.type === 'year') { attrs.type = 'number'; attrs.min = '1900'; attrs.max = String(FLOWS.THIS_YEAR); attrs.placeholder = 'Yıl'; }
+      else if (step.type === 'date') { attrs.type = 'date'; attrs.min = step.year + '-01-01'; attrs.max = step.year + '-12-31'; delete attrs.inputmode; }
+      else { attrs.type = 'number'; attrs.min = String(step.min || 0); attrs.max = String(step.max || 99999); }
+      control = el('input', attrs);
+      if (a[step.id] != null) { control.value = a[step.id]; }
+      var commit = function () {
+        var v = control.value;
+        if (step.type === 'date') { onChange(step.id, DERIVE.validDate(v) && v.slice(0, 4) === String(step.year) ? v : null); return; }
+        var n = parseInt(v, 10);
+        var min = step.type === 'year' ? 1900 : (step.min || 0), max = step.type === 'year' ? FLOWS.THIS_YEAR : (step.max || 99999);
+        onChange(step.id, isFinite(n) && n >= min && n <= max ? n : null);
+      };
+      control.addEventListener('change', commit);
+      control.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); commit(); } });
+    }
+    var wrap = el('div', { class: 'q' + (a[step.id] == null ? ' q-next' : '') }, [label, control]);
+    if (step.help) { wrap.appendChild(el('p', { class: 'help', text: step.help })); }
+    if (step.unit) { label.appendChild(document.createTextNode(' (' + step.unit + ')')); }
+    return wrap;
+  }
+
+  function renderForm(flowId, panel) {
+    var flow = FLOWS.byId(flowId);
+    var a = formAnswers[flowId] = formAnswers[flowId] || {};
+    panel.querySelector('#form-title').textContent = flow.baslik;
+    panel.querySelector('#form-sub').textContent = flow.desc;
+    var host = panel.querySelector('#form-host');
+    var focusId = document.activeElement && host.contains(document.activeElement) ? document.activeElement.id : null;
+    host.innerHTML = '';
+
+    var steps = flow.steps(a);
+    var idx = FLOWS.currentIndex(steps, a);
+    var form = el('form', { class: 'fform', autocomplete: 'off' });
+    form.addEventListener('submit', function (ev) { ev.preventDefault(); });
+    var nextId = null;
+    steps.forEach(function (st) {
+      form.appendChild(formField(flow, st, a, function (id, v) {
+        if (v == null) { delete a[id]; } else { a[id] = v; }
+        renderForm(flowId, panel);
+      }));
+      if (a[st.id] == null && !nextId) { nextId = fieldId(flow.id, st.id); }
+    });
+    host.appendChild(form);
+
+    var actionsTop = el('div', { class: 'actions' }, [
+      el('button', { type: 'button', class: 'btn quiet', text: 'Formu temizle', onclick: function () { formAnswers[flowId] = {}; renderForm(flowId, panel); } })
+    ]);
+
+    if (idx !== -1) {
+      host.appendChild(actionsTop);
+      UI.showSources(null);
+      var f = document.getElementById(focusId) || null;
+      if (f && document.activeElement !== f) { try { f.focus({ preventScroll: true }); } catch (e) { /* yok say */ } }
+      return;
+    }
+
+    var out = flow.evaluate(a);
+    var res = el('div', { class: 'answer form-answer', 'aria-live': 'polite' });
+    out.cards.forEach(function (c, i) { res.appendChild(renderCard(c, i === 0)); });
+    var notes = [];
+    out.cards.forEach(function (c) { notes = notes.concat(c.notes || []); (c.variants || []).forEach(function (v) { notes = notes.concat(v.notes || []); }); });
+    notes = notes.concat(out.notes || []);
+    var nl = UI.noteList(notes);
+    if (nl) { res.appendChild(nl); }
+    var copyBtn = el('button', { type: 'button', class: 'btn secondary', text: 'Kopyala' });
+    copyBtn.addEventListener('click', function () { UI.copySummary(copyBtn); });
+    var acts = el('div', { class: 'actions' });
+    if (UI.canPrint) { acts.appendChild(el('button', { type: 'button', class: 'btn secondary', text: 'Yazdır', onclick: UI.print })); }
+    acts.appendChild(copyBtn);
+    acts.appendChild(actionsTop.firstChild);
+    res.appendChild(acts);
+    host.appendChild(res);
+
+    var refs = [];
+    out.cards.forEach(function (c) { refs = refs.concat(c.refs || []); (c.variants || []).forEach(function (v) { refs = refs.concat(v.refs || []); }); });
+    var facts = FLOWS.facts(flow, a).map(function (fct) {
+      if (fct.person) { var p = personFact(fct.person, steps); return [p.label, p.value + (p.code ? ' (' + p.code + ')' : '')]; }
+      return [fct.label, fct.value];
+    });
+    UI.setPrintSummary({ title: flow.baslik, facts: facts, cards: out.cards, refs: refs, notes: notes });
+    UI.showSources(refs.map(function (r) { return r.key; }));
+    UI.highlightRefs(refs);
+    var g = document.getElementById(focusId);
+    if (g) { try { g.focus({ preventScroll: true }); } catch (e) { /* yok say */ } }
+  }
+
+  window.SGK_WIZARD = { render: render, start: start, renderForm: renderForm };
+  if (document.body.getAttribute('data-mode') !== 'expert') { render(); } else { UI.refreshTab(); }
 })();

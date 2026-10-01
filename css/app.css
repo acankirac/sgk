@@ -456,6 +456,19 @@ table.grid td.g-none { color: var(--muted); }
 table.grid td button { font: inherit; background: none; border: 0; color: inherit; cursor: pointer; padding: 0; width: 100%; }
 
 
+/* ---------- Hızlı giriş formu (tüm modüller) ---------- */
+
+.fform { max-width: 560px; }
+.fform input[type="number"], .fform input[type="date"] {
+  width: 100%; max-width: 16rem; min-height: 3rem; padding: 0 12px;
+  font: inherit; color: var(--text); background: var(--field);
+  border: 1.5px solid var(--field-border); border-radius: 10px;
+}
+.fform input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+.fform .q-next > label::after { content: " · sıradaki"; color: var(--accent); font-weight: 500; font-size: 0.9rem; }
+.form-answer { max-width: 600px; margin-top: 8px; }
+.modes { row-gap: 0; }
+
 /* ---------- Modül grupları ve sonuç kartları ---------- */
 
 .group { margin-top: 1.6rem; }
