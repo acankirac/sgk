@@ -157,14 +157,14 @@ Testler şunları garanti eder:
 
 ## Marka ve kurum logosu
 
-Uygulamanın kendi logosu `assets/icon.svg` (üst bant, sekme simgesi, telefon
-simgesi ve A4 çıktı başlığında kullanılır). Kurum logosu varsayılan olarak
-gösterilmez; kurumun yazılı izni alındıktan sonra logo dosyasını `assets/`
-altına koyup `js/config.js` içinde tanımlayın:
+Uygulama kurum kimliğiyle yayınlanır: üst bantta "T.C. Sosyal Güvenlik Kurumu",
+başlıkta SGK logosu (`assets/sgk-logo.svg`, sgk.gov.tr'deki resmi dosya) ve
+uygulama adı, altta kurum bilgisi ve dayanak yer alır. A4 çıktının başlığında da
+aynı logo kullanılır. Ayarlar `js/config.js` içindedir:
 
 ```js
-window.SGK_CONFIG = { kurumLogo: 'assets/kurum-logo.svg', kurumAdi: 'Sosyal Güvenlik Kurumu' };
+window.SGK_CONFIG = { kurumAdi: 'T.C. Sosyal Güvenlik Kurumu', kurumLogo: 'assets/sgk-logo.svg', uygulamaAdi: 'Çift Aylık Sorgusu' };
 ```
 
-Logo üst bantta ve A4 çıktıda uygulama logosunun solunda, ince bir ayraçla görünür.
-
+`kurumLogo: null` verilirse kurum logosu yerine uygulamanın kendi simgesi
+(`assets/icon.svg`) gösterilir.

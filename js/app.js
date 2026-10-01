@@ -326,6 +326,8 @@
 
   function setTab(key) {
     currentTab = key;
+    var tabEl = $('#tab-' + key);
+    if (document.body.getAttribute('data-mode') === 'expert') { setCrumbs([['Ana sayfa', function () { setMode('wizard'); }], ['Hızlı giriş'], [tabEl ? tabEl.textContent : key]]); }
     $all('[role="tab"]').forEach(function (tab) {
       var on = tab.getAttribute('data-tab') === key;
       tab.setAttribute('aria-selected', on ? 'true' : 'false');
@@ -371,17 +373,35 @@
   // Kurum adı ve logosu js/config.js içinde tanımlıysa gösterilir
   function initKurum() {
     var cfg = window.SGK_CONFIG || {};
-    if (cfg.kurumAdi) {
-      var ad = $('#kurum-adi');
-      ad.textContent = cfg.kurumAdi;
-      ad.hidden = false;
-      document.title = (cfg.uygulamaAdi || 'Çift Aylık Sorgusu') + ' – ' + cfg.kurumAdi;
-    }
+    var ad = cfg.kurumAdi || '';
+    $('#kurum-adi').textContent = ad;
+    $('#kurum-adi').hidden = !ad;
+    $('#foot-kurum').textContent = ad || 'Çift Aylık Sorgusu';
+    if (ad) { document.title = (cfg.uygulamaAdi || 'Çift Aylık Sorgusu') + ' – ' + ad; }
     if (cfg.kurumLogo) {
       var box = $('#kurum');
-      box.appendChild(el('img', { src: cfg.kurumLogo, alt: cfg.kurumAdi || 'Kurum logosu' }));
+      box.appendChild(el('img', { src: cfg.kurumLogo, alt: ad || 'Kurum logosu' }));
       box.hidden = false;
+      $('#app-logo').setAttribute('hidden', '');
+      document.body.classList.add('has-kurum');
     }
+    $('#foot-kaynak').textContent = G.KAYNAK.yazar + ', "' + G.KAYNAK.baslik + '", ' + G.KAYNAK.yayin + '.';
+    $('#foot-tables').addEventListener('click', function () {
+      showSources('all');
+      $('#sources').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  // Sayfa yolu: [['Ana sayfa', fn], ['Modül'], ...]
+  function setCrumbs(items) {
+    var box = $('#crumbs');
+    box.innerHTML = '';
+    if (items.length < 2) return;
+    items.forEach(function (it, i) {
+      if (i > 0) { box.appendChild(el('span', { class: 'crumb-sep', 'aria-hidden': 'true', text: '›' })); }
+      if (it[1] && i < items.length - 1) { box.appendChild(el('button', { type: 'button', class: 'crumb', text: it[0], onclick: it[1] })); }
+      else { box.appendChild(el('span', { class: 'crumb current', text: it[0] })); }
+    });
   }
 
   /* ---------- Yazdırma özeti ve metin ---------- */
@@ -752,7 +772,8 @@
     setPrintSummary: setPrintSummary,
     copySummary: copySummary,
     print: function () { if (canPrint) { window.print(); } },
-    refreshTab: function () { setTab(currentTab); }
+    refreshTab: function () { setTab(currentTab); },
+    setCrumbs: setCrumbs
   };
 
   initKurum();

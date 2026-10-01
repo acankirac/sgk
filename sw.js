@@ -6,7 +6,7 @@ var ASSETS = [
   './', './index.html', './css/app.css', './css/fonts.css',
   './assets/fonts/ibm-plex-sans-latin.woff2', './assets/fonts/ibm-plex-sans-latin-ext.woff2',
   './js/config.js', './js/excel-rows.js', './js/rules.js', './js/engine.js', './js/derive.js', './js/genelge.js', './js/hukum.js', './js/texts.js', './js/flows.js', './js/app.js', './js/wizard.js',
-  './manifest.webmanifest', './assets/icon.svg', './assets/icon-192.png', './assets/icon-512.png'
+  './manifest.webmanifest', './assets/icon.svg', './assets/sgk-logo.svg', './assets/icon-192.png', './assets/icon-512.png'
 ];
 
 self.addEventListener('install', function (event) {

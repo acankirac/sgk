@@ -19,20 +19,28 @@
 
   function start(id) { state.flow = id ? FLOWS.byId(id) : null; state.answers = {}; render(); }
 
+  function crumbs(extra) {
+    var items = [['Ana sayfa', function () { start(null); }]];
+    if (state.flow) { items.push([state.flow.baslik, function () { start(state.flow.id); }]); }
+    if (extra) { items.push([extra]); }
+    UI.setCrumbs(items);
+  }
+
   function render() {
     UI.speech.stop();
     root.innerHTML = '';
-    if (!state.flow) { renderStart(); UI.showSources(null); focusQuestion(); return; }
+    if (!state.flow) { crumbs(); renderStart(); UI.showSources(null); focusQuestion(); return; }
     var steps = state.flow.steps(state.answers);
     var idx = FLOWS.currentIndex(steps, state.answers);
-    if (idx === -1) { renderResult(steps); }
-    else { renderStep(steps, idx); UI.showSources(null); }
+    if (idx === -1) { crumbs('Sorgu sonucu'); renderResult(steps); }
+    else { crumbs('Adım ' + (idx + 1)); renderStep(steps, idx); UI.showSources(null); }
     focusQuestion();
   }
 
   /* ---------- Başlangıç ---------- */
 
   function renderStart() {
+    root.appendChild(el('p', { class: 'progress', text: 'Sorgulama hizmeti' }));
     root.appendChild(el('h1', { class: 'question', text: 'Hangi konuda bilgi almak istiyorsunuz?' }));
     root.appendChild(el('p', { class: 'help', text: 'Size uyan seçeneğe dokunun. Birkaç kısa sorudan sonra cevabı göreceksiniz.' }));
     FLOWS.GROUPS.forEach(function (g) {
@@ -77,7 +85,7 @@
   function renderStep(steps, idx) {
     var step = steps[idx];
     var a = state.answers;
-    root.appendChild(el('p', { class: 'progress' }, [el('span', { class: 'flow-name', text: state.flow.baslik }), ' · Soru ' + (idx + 1)]));
+    root.appendChild(el('p', { class: 'progress', text: 'Adım ' + (idx + 1) }));
     root.appendChild(el('h1', { class: 'question', text: step.q }));
     if (step.help) { root.appendChild(el('p', { class: 'help', text: step.help })); }
 
@@ -194,8 +202,8 @@
       return { label: f.label, value: f.value, index: f.index };
     });
 
-    root.appendChild(el('p', { class: 'progress' }, [el('span', { class: 'flow-name', text: flow.baslik })]));
-    root.appendChild(el('h1', { class: 'question', text: 'Sonuç' }));
+    root.appendChild(el('p', { class: 'progress', text: flow.baslik }));
+    root.appendChild(el('h1', { class: 'question', text: 'Sorgu sonucu' }));
 
     var live = el('div', { role: 'status' });
     out.cards.forEach(function (c, i) { live.appendChild(renderCard(c, i === 0)); });

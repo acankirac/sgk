@@ -1,8 +1,8 @@
 // Kurulum ayarları.
-// kurumAdi: üst bantta ve A4 çıktıda uygulama adının üstünde görünür.
-// kurumLogo: kurumun verdiği resmi logo dosyası (assets/ altına konur), örn. 'assets/kurum-logo.svg'.
+// kurumAdi: üst şeritte, alt bilgide ve A4 çıktıda görünür.
+// kurumLogo: kurumun resmi logo dosyası (assets/ altında).
 window.SGK_CONFIG = {
   kurumAdi: 'T.C. Sosyal Güvenlik Kurumu',
-  kurumLogo: null,
+  kurumLogo: 'assets/sgk-logo.svg',
   uygulamaAdi: 'Çift Aylık Sorgusu'
 };
